@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16...3.31)
 
 project(QpSolversEigen VERSION 0.0.1)
 
-# output paths
+include(GNUInstallDirs)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
@@ -27,7 +27,6 @@ option(BUILD_SHARED_LIBS "Build libraries as shared as opposed to static" ON)
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-include(GNUInstallDirs)
 
 # Dependencies
 find_package(Eigen3 REQUIRED)
