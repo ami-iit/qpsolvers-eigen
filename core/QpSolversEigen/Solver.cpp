@@ -59,6 +59,11 @@ bool Solver::instantiateSolver(std::string solverName)
     return true;
 }
 
+std::string Solver::getSolverName() const
+{
+    return m_pimpl->solver->getSolverName();
+}
+
 bool Solver::initSolver()
 {
     return m_pimpl->solver->initSolver();

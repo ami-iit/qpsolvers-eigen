@@ -5,8 +5,12 @@
  * @date 2020
  */
 
+// Include macros common to all test
+#include "QpSolversEigenCommonTestMacros.hpp"
+
 // Catch2
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators_all.hpp>
 
 // QpSolversEigen
 #include <QpSolversEigen/QpSolversEigen.hpp>
@@ -21,20 +25,20 @@
 #define COUT_GTEST ANSI_TXT_GRN << GTEST_BOX // You could add the Default
 #define COUT_GTEST_MGT COUT_GTEST << ANSI_TXT_MGT
 
-Eigen::Matrix<double, 2, 2> H;
-Eigen::SparseMatrix<double> H_s;
-Eigen::Matrix<double, 3, 2> A;
-Eigen::SparseMatrix<double> A_s;
-Eigen::Matrix<double, 2, 1> gradient;
-Eigen::Matrix<double, 3, 1> lowerBound;
-Eigen::Matrix<double, 3, 1> upperBound;
 
-QpSolversEigen::Solver solver;
-
-
-TEST_CASE("QPProblem - FirstRun")
+TEST_CASE("QPProblem - UpdateMatricesTest")
 {
-    REQUIRE(solver.instantiateSolver("osqp"));
+    Eigen::Matrix<double, 2, 2> H;
+    Eigen::SparseMatrix<double> H_s;
+    Eigen::Matrix<double, 3, 2> A;
+    Eigen::SparseMatrix<double> A_s;
+    Eigen::Matrix<double, 2, 1> gradient;
+    Eigen::Matrix<double, 3, 1> lowerBound;
+    Eigen::Matrix<double, 3, 1> upperBound;
+
+    std::string solverName = QPSOLVERSEIGEN_SOLVERS_TO_TEST;
+    QpSolversEigen::Solver solver;
+    REQUIRE(solver.instantiateSolver(solverName));
 
     // hessian matrix
     H << 4, 0, 0, 2;
@@ -49,11 +53,14 @@ TEST_CASE("QPProblem - FirstRun")
     lowerBound << 1, 0, 0;
     upperBound << 1, 0.7, 0.7;
 
-    solver.setBooleanParameter("verbose", false);
-
+    // Set osqp-specific parameters
+    if (solver.getSolverName() == "osqp")
+    {
+        solver.setBooleanParameter("verbose", false);
+        solver.setIntegerParameter("scaling", 0);
+    }
     solver.setNumberOfVariables(2);
     solver.setNumberOfConstraints(3);
-    solver.setIntegerParameter("scaling", 0);
     REQUIRE(solver.setHessianMatrix(H_s));
     REQUIRE(solver.setGradient(gradient));
     REQUIRE(solver.setLinearConstraintsMatrix(A_s));
@@ -66,10 +73,7 @@ TEST_CASE("QPProblem - FirstRun")
     auto solution = solver.getSolution();
     std::cout << COUT_GTEST_MGT << "Solution [" << solution(0) << " " << solution(1) << "]"
               << ANSI_TXT_DFT << std::endl;
-}
 
-TEST_CASE("QPProblem - SparsityConstant")
-{
     // update hessian matrix
     H << 4, 0, 0, 2;
     H_s = H.sparseView();
@@ -80,13 +84,10 @@ TEST_CASE("QPProblem - SparsityConstant")
     REQUIRE(solver.updateLinearConstraintsMatrix(A_s));
     REQUIRE(solver.solveProblem() == QpSolversEigen::ErrorExitFlag::NoError);
 
-    auto solution = solver.getSolution();
+    solution = solver.getSolution();
     std::cout << COUT_GTEST_MGT << "Solution [" << solution(0) << " " << solution(1) << "]"
               << ANSI_TXT_DFT << std::endl;
-};
 
-TEST_CASE("QPProblem - SparsityChange")
-{
     // update hessian matrix
     H << 1, 1, 1, 2;
     H_s = H.sparseView();
@@ -97,7 +98,7 @@ TEST_CASE("QPProblem - SparsityChange")
     REQUIRE(solver.updateLinearConstraintsMatrix(A_s));
     REQUIRE(solver.solveProblem() == QpSolversEigen::ErrorExitFlag::NoError);
 
-    auto solution = solver.getSolution();
+    solution = solver.getSolution();
     std::cout << COUT_GTEST_MGT << "Solution [" << solution(0) << " " << solution(1) << "]"
               << ANSI_TXT_DFT << std::endl;
 };

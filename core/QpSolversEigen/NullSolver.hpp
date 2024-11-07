@@ -28,6 +28,7 @@ private:
 public:
     virtual ~NullSolver() = default;
 
+    std::string getSolverName() const override;
     bool initSolver() override;
     bool isInitialized() override;
     void clearSolver() override;

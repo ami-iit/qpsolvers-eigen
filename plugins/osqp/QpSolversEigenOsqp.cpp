@@ -12,10 +12,10 @@ namespace QpSolversEigen
 {
 
 /**
- * OsqpSolver class is a class that implements the SolverInterface but does nothing.
+ * ProxqpSolver class is a class that implements the SolverInterface but does nothing.
  *
  */
-class OsqpSolver final: public SolverInterface
+class ProxqpSolver final: public SolverInterface
 {
 private:
     // OSQP solver
@@ -36,8 +36,9 @@ private:
     Eigen::VectorXd upperBoundBufferWithOsqpEigenInfty;
 
 public:
-    virtual ~OsqpSolver() = default;
+    virtual ~ProxqpSolver() = default;
 
+    std::string getSolverName() const override;
     bool initSolver() override;
     bool isInitialized() override;
     void clearSolver() override;
@@ -79,9 +80,9 @@ public:
 
 // The first argument needs to be coherent with the scheme used in
 // getShlibppFactoryNameFromSolverName, i.e. qpsolvers_eigen_<solverName>
-SHLIBPP_DEFINE_SHARED_SUBCLASS(qpsolvers_eigen_osqp, QpSolversEigen::OsqpSolver, QpSolversEigen::SolverInterface);
+SHLIBPP_DEFINE_SHARED_SUBCLASS(qpsolvers_eigen_osqp, QpSolversEigen::ProxqpSolver, QpSolversEigen::SolverInterface);
 
-QpSolversEigen::ErrorExitFlag OsqpSolver::convertErrorExitFlag(const OsqpEigen::ErrorExitFlag errorExitFlag) const
+QpSolversEigen::ErrorExitFlag ProxqpSolver::convertErrorExitFlag(const OsqpEigen::ErrorExitFlag errorExitFlag) const
 {
     switch (errorExitFlag)
     {
@@ -106,7 +107,7 @@ QpSolversEigen::ErrorExitFlag OsqpSolver::convertErrorExitFlag(const OsqpEigen::
     }
 }
 
-QpSolversEigen::Status OsqpSolver::convertStatus(const OsqpEigen::Status status) const
+QpSolversEigen::Status ProxqpSolver::convertStatus(const OsqpEigen::Status status) const
 {
     switch (status)
     {
@@ -137,7 +138,7 @@ QpSolversEigen::Status OsqpSolver::convertStatus(const OsqpEigen::Status status)
     }
 }
 
-bool OsqpSolver::convertQpSolversEigenInftyToOsqpEigenInfty(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& inputBound,
+bool ProxqpSolver::convertQpSolversEigenInftyToOsqpEigenInfty(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& inputBound,
                                                             Eigen::VectorXd& outputBound)
 {
     outputBound = inputBound;
@@ -156,79 +157,84 @@ bool OsqpSolver::convertQpSolversEigenInftyToOsqpEigenInfty(const Eigen::Ref<con
     return true;
 }
 
-bool OsqpSolver::initSolver()
+std::string ProxqpSolver::getSolverName() const
+{
+    return "osqp";
+}
+
+bool ProxqpSolver::initSolver()
 {
     return osqpEigenSolver.initSolver();
 }
 
-bool OsqpSolver::isInitialized()
+bool ProxqpSolver::isInitialized()
 {
     return osqpEigenSolver.isInitialized();
 }
 
-void OsqpSolver::clearSolver()
+void ProxqpSolver::clearSolver()
 {
     return osqpEigenSolver.clearSolver();
 }
 
-bool OsqpSolver::clearSolverVariables()
+bool ProxqpSolver::clearSolverVariables()
 {
     return osqpEigenSolver.clearSolverVariables();
 }
 
-QpSolversEigen::ErrorExitFlag OsqpSolver::solveProblem()
+QpSolversEigen::ErrorExitFlag ProxqpSolver::solveProblem()
 {
     return this->convertErrorExitFlag(osqpEigenSolver.solveProblem());
 }
 
-QpSolversEigen::Status OsqpSolver::getStatus() const
+QpSolversEigen::Status ProxqpSolver::getStatus() const
 {
     return this->convertStatus(osqpEigenSolver.getStatus());
 }
 
-const double OsqpSolver::getObjValue() const
+const double ProxqpSolver::getObjValue() const
 {
     return osqpEigenSolver.getObjValue();
 }
 
-const Eigen::Matrix<double, Eigen::Dynamic, 1>& OsqpSolver::getSolution()
+const Eigen::Matrix<double, Eigen::Dynamic, 1>& ProxqpSolver::getSolution()
 {
     return osqpEigenSolver.getSolution();
 }
 
-const Eigen::Matrix<double, Eigen::Dynamic, 1>& OsqpSolver::getDualSolution()
+const Eigen::Matrix<double, Eigen::Dynamic, 1>& ProxqpSolver::getDualSolution()
 {
     return osqpEigenSolver.getDualSolution();
 }
 
-bool OsqpSolver::updateHessianMatrix(const Eigen::SparseMatrix<double> &hessianMatrix)
+bool ProxqpSolver::updateHessianMatrix(const Eigen::SparseMatrix<double> &hessianMatrix)
 {
     return osqpEigenSolver.updateHessianMatrix(hessianMatrix);
 }
 
-bool OsqpSolver::updateLinearConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix)
+bool ProxqpSolver::updateLinearConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix)
 {
     return osqpEigenSolver.updateLinearConstraintsMatrix(linearConstraintsMatrix);
 }
 
-bool OsqpSolver::updateGradient(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& gradient)
+bool ProxqpSolver::updateGradient(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& gradient)
 {
     return osqpEigenSolver.updateGradient(gradient);
 }
 
-bool OsqpSolver::updateLowerBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound)
+bool ProxqpSolver::updateLowerBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound)
 {
     bool ok = convertQpSolversEigenInftyToOsqpEigenInfty(lowerBound, lowerBoundBufferWithOsqpEigenInfty);
     return ok && osqpEigenSolver.updateLowerBound(lowerBoundBufferWithOsqpEigenInfty);
 }
 
-bool OsqpSolver::updateUpperBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound)
+bool ProxqpSolver::updateUpperBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound)
 {
     bool ok = convertQpSolversEigenInftyToOsqpEigenInfty(upperBound, upperBoundBufferWithOsqpEigenInfty);
     return ok && osqpEigenSolver.updateUpperBound(lowerBoundBufferWithOsqpEigenInfty);
 }
 
-bool OsqpSolver::updateBounds(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound,
+bool ProxqpSolver::updateBounds(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound,
              const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound)
 {
     bool ok = convertQpSolversEigenInftyToOsqpEigenInfty(lowerBound, lowerBoundBufferWithOsqpEigenInfty);
@@ -236,60 +242,60 @@ bool OsqpSolver::updateBounds(const Eigen::Ref<const Eigen::Matrix<double, Eigen
     return osqpEigenSolver.updateBounds(lowerBoundBufferWithOsqpEigenInfty, upperBoundBufferWithOsqpEigenInfty);
 }
 
-void OsqpSolver::clearHessianMatrix()
+void ProxqpSolver::clearHessianMatrix()
 {
     return osqpEigenSolver.data()->clearHessianMatrix();
 }
 
-void OsqpSolver::clearLinearConstraintsMatrix()
+void ProxqpSolver::clearLinearConstraintsMatrix()
 {
     return osqpEigenSolver.data()->clearLinearConstraintsMatrix();
 }
 
-void OsqpSolver::setNumberOfVariables(int n)
+void ProxqpSolver::setNumberOfVariables(int n)
 {
     return osqpEigenSolver.data()->setNumberOfVariables(n);
 }
 
-void OsqpSolver::setNumberOfConstraints(int m)
+void ProxqpSolver::setNumberOfConstraints(int m)
 {
     return osqpEigenSolver.data()->setNumberOfConstraints(m);
 }
 
-bool OsqpSolver::setHessianMatrix(const Eigen::SparseMatrix<double>& hessianMatrix)
+bool ProxqpSolver::setHessianMatrix(const Eigen::SparseMatrix<double>& hessianMatrix)
 {
     return osqpEigenSolver.data()->setHessianMatrix(hessianMatrix);
 }
 
-bool OsqpSolver::setGradient(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> gradientVector)
+bool ProxqpSolver::setGradient(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> gradientVector)
 {
     return  osqpEigenSolver.data()->setGradient(gradientVector);
 }
 
-Eigen::Matrix<double, Eigen::Dynamic, 1> OsqpSolver::getGradient()
+Eigen::Matrix<double, Eigen::Dynamic, 1> ProxqpSolver::getGradient()
 {
     return Eigen::Matrix<double, Eigen::Dynamic, 1>();
 }
 
 bool
-OsqpSolver::setLinearConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix)
+ProxqpSolver::setLinearConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix)
 {
     return osqpEigenSolver.data()->setLinearConstraintsMatrix(linearConstraintsMatrix);
 }
 
-bool OsqpSolver::setLowerBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBoundVector)
+bool ProxqpSolver::setLowerBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBoundVector)
 {
     bool ok = convertQpSolversEigenInftyToOsqpEigenInfty(lowerBoundVector, lowerBoundBufferWithOsqpEigenInfty);
     return osqpEigenSolver.data()->setLowerBound(lowerBoundBufferWithOsqpEigenInfty);
 }
 
-bool OsqpSolver::setUpperBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBoundVector)
+bool ProxqpSolver::setUpperBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBoundVector)
 {
     bool ok = convertQpSolversEigenInftyToOsqpEigenInfty(upperBoundVector, upperBoundBufferWithOsqpEigenInfty);
     return osqpEigenSolver.data()->setUpperBound(upperBoundVector);
 }
 
-bool OsqpSolver::setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBound,
+bool ProxqpSolver::setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBound,
                Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBound)
 {
     bool ok = convertQpSolversEigenInftyToOsqpEigenInfty(lowerBound, lowerBoundBufferWithOsqpEigenInfty);
@@ -297,7 +303,7 @@ bool OsqpSolver::setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> 
     return osqpEigenSolver.data()->setBounds(lowerBoundBufferWithOsqpEigenInfty, upperBoundBufferWithOsqpEigenInfty);
 }
 
-bool OsqpSolver::setBooleanParameter(const std::string& settingName, bool value)
+bool ProxqpSolver::setBooleanParameter(const std::string& settingName, bool value)
 {
     // If you edit this method, remember to update
     // the documentation in the README of the osqp plugin
@@ -327,11 +333,11 @@ bool OsqpSolver::setBooleanParameter(const std::string& settingName, bool value)
         return true;
     }
 
-    QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::setBooleanParameter: unknown setting name: " << settingName << std::endl;
+    QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::setBooleanParameter: unknown setting name: " << settingName << std::endl;
     return false;
 }
 
-bool OsqpSolver::setIntegerParameter(const std::string& settingName, int64_t value)
+bool ProxqpSolver::setIntegerParameter(const std::string& settingName, int64_t value)
 {
     // If you edit this method, remember to update
     // the documentation in the README of the osqp plugin
@@ -361,11 +367,11 @@ bool OsqpSolver::setIntegerParameter(const std::string& settingName, int64_t val
         return true;
     }
 
-    QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::setIntegerParameter: unknown setting name: " << settingName << std::endl;
+    QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::setIntegerParameter: unknown setting name: " << settingName << std::endl;
     return false;
 }
 
-bool OsqpSolver::setRealNumberParameter(const std::string& settingName, double value)
+bool ProxqpSolver::setRealNumberParameter(const std::string& settingName, double value)
 {
     // If you edit this method, remember to update
     // the documentation in the README of the osqp plugin
@@ -411,13 +417,13 @@ bool OsqpSolver::setRealNumberParameter(const std::string& settingName, double v
         return true;
     }
 
-    QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::setRealNumberParameter: unknown setting name: " << settingName << std::endl;
+    QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::setRealNumberParameter: unknown setting name: " << settingName << std::endl;
     return false;
 }
 
-SolverInterface* OsqpSolver::allocateInstance() const
+SolverInterface* ProxqpSolver::allocateInstance() const
 {
-    return new OsqpSolver();
+    return new ProxqpSolver();
 }
 
 }

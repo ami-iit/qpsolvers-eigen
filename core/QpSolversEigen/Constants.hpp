@@ -28,6 +28,8 @@ enum class Status : int
     NonCvx = 9,
     Sigint = 10,
     Unsolved = 11,
+    SolverNotInitialized = 12,
+    SolvedClosestPrimalFeasible = 13,
     SolverSpecificUnknownStatus = 1000,
 };
 

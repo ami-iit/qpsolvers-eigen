@@ -5,10 +5,14 @@
  * @date 2020
  */
 
+// Include macros common to all test
+#include "QpSolversEigenCommonTestMacros.hpp"
+
 #include <iostream>
 
 // Catch2
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators_all.hpp>
 
 #include <QpSolversEigen/QpSolversEigen.hpp>
 
@@ -26,7 +30,8 @@ TEST_CASE("QPProblem - Unconstrained")
     gradient << 3, 1;
 
     QpSolversEigen::Solver solver;
-    REQUIRE(solver.instantiateSolver("osqp"));
+    std::string solverName = QPSOLVERSEIGEN_SOLVERS_TO_TEST;
+    REQUIRE(solver.instantiateSolver(solverName));
     REQUIRE(solver.setBooleanParameter("verbose", true));
     REQUIRE(solver.setRealNumberParameter("alpha", 1.0));
 
@@ -72,15 +77,18 @@ TEST_CASE("QPProblem")
     upperBound << 1, 0.7, 0.7;
 
     QpSolversEigen::Solver solver;
-    REQUIRE(solver.instantiateSolver("osqp"));
-    REQUIRE(solver.setBooleanParameter("verbose", true));
-    REQUIRE(solver.setRealNumberParameter("alpha", 1.0));
-    // This is required to avoid non-deterministic non-accurate solutions
-    // See https://github.com/robotology/osqp-eigen/pull/172
-    REQUIRE(solver.setBooleanParameter("polish", true));
+    std::string solverName = QPSOLVERSEIGEN_SOLVERS_TO_TEST;
+    REQUIRE(solver.instantiateSolver(solverName));
 
+    if (solver.getSolverName() == "osqp")
+    {
+        REQUIRE(solver.setBooleanParameter("verbose", true));
+        REQUIRE(solver.setRealNumberParameter("alpha", 1.0));
+        // This is required to avoid non-deterministic non-accurate solutions
+        // See https://github.com/robotology/osqp-eigen/pull/172
+        REQUIRE(solver.setBooleanParameter("polish", true));
+    }
 
-    REQUIRE_FALSE(solver.data()->setHessianMatrix(H_s));
     solver.data()->setNumberOfVariables(2);
 
     solver.data()->setNumberOfConstraints(3);

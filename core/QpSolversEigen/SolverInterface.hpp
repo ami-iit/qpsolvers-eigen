@@ -27,6 +27,7 @@ class SolverInterface
 public:
     virtual ~SolverInterface() = default;
 
+    virtual std::string getSolverName() const = 0;
     virtual bool initSolver() = 0;
     virtual bool isInitialized() = 0;
     virtual void clearSolver() = 0;

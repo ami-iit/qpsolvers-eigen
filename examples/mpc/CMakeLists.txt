@@ -6,3 +6,4 @@ find_package(QpSolversEigen REQUIRED)
 
 add_executable(QpSolversEigen-MPCExaple MPCExample.cpp)
 target_link_libraries(QpSolversEigen-MPCExaple QpSolversEigen::QpSolversEigen)
+target_compile_features(QpSolversEigen-MPCExaple PUBLIC cxx_std_20)

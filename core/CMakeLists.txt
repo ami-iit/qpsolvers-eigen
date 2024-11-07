@@ -23,7 +23,7 @@ target_include_directories(QpSolversEigen PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
   "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
-target_link_libraries(QpSolversEigen PUBLIC Eigen3::Eigen sharedlibpp::sharedlibpp)
+target_link_libraries(QpSolversEigen PUBLIC Eigen3::Eigen PRIVATE sharedlibpp::sharedlibpp)
 add_library(QpSolversEigen::QpSolversEigen ALIAS QpSolversEigen)
 
 set_target_properties(QpSolversEigen PROPERTIES

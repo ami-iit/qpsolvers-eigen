@@ -4,6 +4,11 @@
 namespace QpSolversEigen
 {
 
+std::string NullSolver::getSolverName() const
+{
+    return "null";
+}
+
 bool NullSolver::initSolver()
 {
     return false;

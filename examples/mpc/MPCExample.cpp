@@ -1,7 +1,8 @@
-#include <QpSolversEigen/QpSolversEigen.h>
+#include <QpSolversEigen/QpSolversEigen.hpp>
 #include <Eigen/Dense>
 
 #include <iostream>
+#include <numbers>
 
 void setDynamicsMatrices(Eigen::Matrix<double, 12, 12>& a, Eigen::Matrix<double, 12, 4>& b)
 {
@@ -32,11 +33,11 @@ void setInequalityConstraints(Eigen::Matrix<double, 12, 1>& xMax,
     uMax << 13 - u0, 13 - u0, 13 - u0, 13 - u0;
 
     // state inequality constraints
-    xMin << -M_PI / 6, -M_PI / 6, -QpSolversEigen::INFTY, -QpSolversEigen::INFTY, -QpSolversEigen::INFTY, -1.,
+    xMin << -std::numbers::pi / 6, -std::numbers::pi / 6, -QpSolversEigen::INFTY, -QpSolversEigen::INFTY, -QpSolversEigen::INFTY, -1.,
         -QpSolversEigen::INFTY, -QpSolversEigen::INFTY, -QpSolversEigen::INFTY, -QpSolversEigen::INFTY,
         -QpSolversEigen::INFTY, -QpSolversEigen::INFTY;
 
-    xMax << M_PI / 6, M_PI / 6, QpSolversEigen::INFTY, QpSolversEigen::INFTY, QpSolversEigen::INFTY,
+    xMax << std::numbers::pi / 6, std::numbers::pi / 6, QpSolversEigen::INFTY, QpSolversEigen::INFTY, QpSolversEigen::INFTY,
         QpSolversEigen::INFTY, QpSolversEigen::INFTY, QpSolversEigen::INFTY, QpSolversEigen::INFTY, QpSolversEigen::INFTY,
         QpSolversEigen::INFTY, QpSolversEigen::INFTY;
 }
@@ -249,21 +250,25 @@ int main()
     }
 
     // settings
-    // solver.settings()->setBoolParameter("verbose", false);
-    solver.settings()->setBoolParameter("warm_starting", true);
+    // Set osqp-specific parameters
+    if (solver.getSolverName() == "osqp")
+    {
+        // solver.setBooleanParameter("verbose", false);
+        solver.setBooleanParameter("warm_starting", true);
+    }
 
     // set the initial data of the QP solver
-    solver.data()->setNumberOfVariables(12 * (mpcWindow + 1) + 4 * mpcWindow);
-    solver.data()->setNumberOfConstraints(2 * 12 * (mpcWindow + 1) + 4 * mpcWindow);
-    if (!solver.data()->setHessianMatrix(hessian))
+    solver.setNumberOfVariables(12 * (mpcWindow + 1) + 4 * mpcWindow);
+    solver.setNumberOfConstraints(2 * 12 * (mpcWindow + 1) + 4 * mpcWindow);
+    if (!solver.setHessianMatrix(hessian))
         return 1;
-    if (!solver.data()->setGradient(gradient))
+    if (!solver.setGradient(gradient))
         return 1;
-    if (!solver.data()->setLinearConstraintsMatrix(linearMatrix))
+    if (!solver.setLinearConstraintsMatrix(linearMatrix))
         return 1;
-    if (!solver.data()->setLowerBound(lowerBound))
+    if (!solver.setLowerBound(lowerBound))
         return 1;
-    if (!solver.data()->setUpperBound(upperBound))
+    if (!solver.setUpperBound(upperBound))
         return 1;
 
     // instantiate the solver

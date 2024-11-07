@@ -5,8 +5,12 @@
  * @date 2018-2024
  */
 
+// Include macros common to all test
+#include "QpSolversEigenCommonTestMacros.hpp"
+
 // Catch2
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators_all.hpp>
 
 // QpSolversEigen
 #include <QpSolversEigen/QpSolversEigen.hpp>
@@ -269,9 +273,11 @@ TEST_CASE("MPCTest")
     castMPCToQPConstraintMatrix(a, b, mpcWindow, linearMatrix);
     castMPCToQPConstraintVectors(xMax, xMin, uMax, uMin, x0, mpcWindow, lowerBound, upperBound);
 
+
     // instantiate the solver
+    std::string solverName = QPSOLVERSEIGEN_SOLVERS_TO_TEST;
     QpSolversEigen::Solver solver;
-    REQUIRE(solver.instantiateSolver("osqp"));
+    REQUIRE(solver.instantiateSolver(solverName));
 
     // settings
     REQUIRE(solver.setBooleanParameter("verbose", false));

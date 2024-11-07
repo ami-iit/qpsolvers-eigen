@@ -52,6 +52,7 @@ pkg-config = "*"
 osqp-eigen = "*"
 ycm-cmake-modules = "*"
 catch2 = "*"
+proxsuite = "*"
 
 [target.linux.dependencies]
 valgrind = "*"

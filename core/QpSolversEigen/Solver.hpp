@@ -41,6 +41,13 @@ public:
     bool instantiateSolver(std::string solverName = "osqp");
 
     /**
+     * Get the name of the solver.
+     *
+     * @return the value passed to the instantiateSolver method if the instantiateSolver was successful, or "null" otherwise.
+     */
+    std::string getSolverName() const;
+
+    /**
      * Initialize the solver with the actual initial data and settings.
      * @return true/false in case of success/failure.
      */
