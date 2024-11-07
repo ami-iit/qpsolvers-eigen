@@ -253,10 +253,15 @@ TEST_CASE("MPCTest Update matrices")
     std::string solverName = QPSOLVERSEIGEN_SOLVERS_TO_TEST;
     QpSolversEigen::Solver solver;
     REQUIRE(solver.instantiateSolver(solverName));
-
+    std::cout << COUT_GTEST_MGT << "Testing solver " << solver.getSolverName()
+              << ANSI_TXT_DFT << std::endl;
     // settings
     REQUIRE(solver.setBooleanParameter("verbose", false));
-    REQUIRE(solver.setBooleanParameter("warm_start", true));
+
+    if (solver.getSolverName() == "osqp")
+    {
+        REQUIRE(solver.setBooleanParameter("warm_start", true));
+    }
 
     // set the initial data of the QP solver
     solver.data()->setNumberOfVariables(2 * (mpcWindow + 1) + 1 * mpcWindow);

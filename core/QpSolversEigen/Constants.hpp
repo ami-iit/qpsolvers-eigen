@@ -1,6 +1,7 @@
 #ifndef QPSOLVERSEIGEN_CONSTANTS_HPP
 #define QPSOLVERSEIGEN_CONSTANTS_HPP
 
+#include <limits>
 #include <string>
 
 namespace QpSolversEigen
@@ -9,7 +10,7 @@ constexpr double INFTY = std::numeric_limits<double>::infinity(); /**< Infinity 
 
 /**
  * Status of the solver.
- * 
+ *
  * For historical reasons, the status code resemble the one of OSQP, however this is not something that 
  * is guaranteed to be true in the future. Each solver status will be mapped to this QpSolversEigen specific
  * status code. If the solver status of the solver does not match any of the listed status, the status reported

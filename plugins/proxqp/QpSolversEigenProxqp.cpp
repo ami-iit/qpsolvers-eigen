@@ -20,10 +20,10 @@ private:
     proxsuite::proxqp::Settings<double> proxqpSettings;
     // proxqp sparse solver
     std::unique_ptr<proxsuite::proxqp::sparse::QP<double, long long>> proxqpSparseSolver;
-    int numberOfVariables = 0;
-    int numberOfConstraints = 0;
 
     struct InitialSparseSolverData {
+        int numberOfVariables = 0;
+        int numberOfConstraints = 0;
 
         // Hessian
         bool isHessianSet = false;
@@ -48,7 +48,9 @@ private:
 
         bool isSet()
         {
-            return isHessianSet && isGradientSet && isLinearConstraintsSet && isLowerBoundSet && isUpperBoundSet;
+            return isHessianSet && isGradientSet &&
+                   // If the problem is unconstrained there is no need to set the constraint-related variables
+                   ((isLinearConstraintsSet && isLowerBoundSet && isUpperBoundSet) || (numberOfConstraints == 0));
         }
     } initialSparseSolverData;
 
@@ -143,12 +145,12 @@ std::string ProxqpSolver::getSolverName() const
 
 void ProxqpSolver::setNumberOfVariables(int n)
 {
-    numberOfVariables = n;
+    initialSparseSolverData.numberOfVariables = n;
 }
 
 void ProxqpSolver::setNumberOfConstraints(int m)
 {
-    numberOfConstraints = m;
+    initialSparseSolverData.numberOfConstraints = m;
 }
 
 bool ProxqpSolver::initSolver()
@@ -161,7 +163,7 @@ bool ProxqpSolver::initSolver()
 
     // See https://github.com/ami-iit/qpsolvers-eigen/issues/4
     int numberOfEqualityConstraints = 0;
-    proxqpSparseSolver = std::make_unique<proxsuite::proxqp::sparse::QP<double, long long>>(numberOfVariables, numberOfEqualityConstraints, numberOfConstraints);
+    proxqpSparseSolver = std::make_unique<proxsuite::proxqp::sparse::QP<double, long long>>(initialSparseSolverData.numberOfVariables, numberOfEqualityConstraints, initialSparseSolverData.numberOfConstraints);
     syncSettings();
     proxqpSparseSolver->init(initialSparseSolverData.H, initialSparseSolverData.g,
                              initialSparseSolverData.A, initialSparseSolverData.b,
@@ -279,6 +281,7 @@ bool ProxqpSolver::updateBounds(const Eigen::Ref<const Eigen::Matrix<double, Eig
     proxqpSparseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
                                proxsuite::nullopt, proxsuite::nullopt,
                                proxsuite::nullopt, lowerBound, upperBound);
+    return true;
 }
 
 void ProxqpSolver::clearHessianMatrix()
@@ -295,7 +298,7 @@ void ProxqpSolver::clearLinearConstraintsMatrix()
 
 bool ProxqpSolver::setHessianMatrix(const Eigen::SparseMatrix<double>& hessianMatrix)
 {
-    initialSparseSolverData.A = hessianMatrix;
+    initialSparseSolverData.H = hessianMatrix;
     initialSparseSolverData.isHessianSet = true;
     return true;
 }
@@ -322,14 +325,14 @@ ProxqpSolver::setLinearConstraintsMatrix(const Eigen::SparseMatrix<double>& line
 
 bool ProxqpSolver::setLowerBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBoundVector)
 {
-    initialSparseSolverData.b = lowerBoundVector;
+    initialSparseSolverData.l = lowerBoundVector;
     initialSparseSolverData.isLowerBoundSet = true;
     return true;
 }
 
 bool ProxqpSolver::setUpperBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBoundVector)
 {
-    initialSparseSolverData.b = upperBoundVector;
+    initialSparseSolverData.u = upperBoundVector;
     initialSparseSolverData.isUpperBoundSet = true;
     return true;
 }

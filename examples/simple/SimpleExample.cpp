@@ -34,7 +34,7 @@ int main()
     // Here you select the solver, possible options are:
     // * osqp
     // * proxqp
-    bool ok = solver.instantiateSolver("osqp");
+    bool ok = solver.instantiateSolver("proxqp");
 
     if (!ok)
     {

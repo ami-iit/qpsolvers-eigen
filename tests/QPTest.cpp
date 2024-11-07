@@ -32,8 +32,12 @@ TEST_CASE("QPProblem - Unconstrained")
     QpSolversEigen::Solver solver;
     std::string solverName = QPSOLVERSEIGEN_SOLVERS_TO_TEST;
     REQUIRE(solver.instantiateSolver(solverName));
+
     REQUIRE(solver.setBooleanParameter("verbose", true));
-    REQUIRE(solver.setRealNumberParameter("alpha", 1.0));
+    if (solver.getSolverName() == "osqp")
+    {
+        REQUIRE(solver.setRealNumberParameter("alpha", 1.0));
+    }
 
     solver.setNumberOfVariables(2);
     solver.setNumberOfConstraints(0);
