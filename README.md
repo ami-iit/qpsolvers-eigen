@@ -1,7 +1,5 @@
 # qpsolvers-eigen
 
-# osqp-eigen
-
 Simple C++ abstraction layer for quadratic programming solvers using [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page).
 
 ## 🛠️ Usage
@@ -11,7 +9,7 @@ Please install the library following one (and just one) method listed below.
 #### 📦 Install with conda or pixi (recommended)
 
 > [!WARNING]
-> This section is just a preview
+> This section is just a preview, as the library is not packaged in conda-forge. Once the library is packaged, we will remove this warning.
 
 You can easily the library with [`conda`](https://github.com/conda-forge/qpsolvers-eigen-feedstock) in a new conda environment with
 ```
@@ -177,7 +175,7 @@ For more examples, check the content of the [./examples](./examples) folder in t
 
 ### Migrate from osqp-eigen
 
-If you are already using `osqp-eigen` and you want to understand how to migrate your code to `qpsolvers-eigen`, check the [`./doc/migrate_from_osqp_eigen.md`](./doc/migrate_from_osqp_eigen.md) document.
+If you are already using `osqp-eigen` and you want to understand how to migrate your code to `qpsolvers-eigen`, check the [`./docs/migrate_from_osqp_eigen.md`](./docs/migrate_from_osqp_eigen.md) document.
 
 ## 🐛 Bug reports and support
 
