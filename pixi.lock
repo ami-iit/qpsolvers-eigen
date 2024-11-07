@@ -346,6 +346,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/vc14_runtime-14.40.33810-hcc2c482_22.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/vs2015_runtime-14.40.33810-h3bf8584_22.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/vs2019_win-64-19.29.30139-he1865b1_22.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/vs2022_win-64-19.41.34120-h72b6792_22.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/vswhere-3.1.7-h57928b3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/xz-5.2.6-h8d14728_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/ycm-cmake-modules-0.16.9-he0c23c2_0.conda
@@ -5790,6 +5791,25 @@ packages:
   license_family: BSD
   size: 19994
   timestamp: 1728401194337
+- kind: conda
+  name: vs2022_win-64
+  version: 19.41.34120
+  build: h72b6792_22
+  build_number: 22
+  subdir: win-64
+  url: https://conda.anaconda.org/conda-forge/win-64/vs2022_win-64-19.41.34120-h72b6792_22.conda
+  sha256: fe957098537cc2c6e1bf22367d24e6360d50be98468cbc651c50d174c041b681
+  md5: 3468ec40f54e180c1cd382e72c9a8a4b
+  depends:
+  - vswhere
+  constrains:
+  - vs_win-64 2022.11
+  track_features:
+  - vc14
+  license: BSD-3-Clause
+  license_family: BSD
+  size: 20060
+  timestamp: 1728401060214
 - kind: conda
   name: vswhere
   version: 3.1.7

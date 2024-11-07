@@ -20,6 +20,8 @@ QPSOLVERSEIGEN_RUN_Valgrind_tests = "OFF"
 [target.linux.activation.env]
 QPSOLVERSEIGEN_RUN_Valgrind_tests = "ON"
 
+
+
 [tasks]
 configure = { cmd = [
     "cmake",
@@ -56,3 +58,8 @@ proxsuite = "*"
 
 [target.linux.dependencies]
 valgrind = "*"
+
+# MSVC 2022 is required here as proxqp requires it
+[target.win-64.dependencies]
+vs2022_win-64 = "*"
+
