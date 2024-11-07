@@ -6,8 +6,59 @@
 #include <sharedlibpp/SharedLibraryClassFactory.h>
 #include <sharedlibpp/SharedLibraryClass.h>
 
+#include <optional>
+#include <filesystem>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
+
 namespace QpSolversEigen
 {
+
+// Inspired by https://github.com/ami-iit/reloc-cpp, but a bit different (and simpler)
+// as in this case we just need the location of the qpsolvers-eigen shared library
+std::optional<std::string> getPathOfQpSolversEigenSharedLibrary()
+{
+    std::error_code fs_error;
+
+    // Get location of the library
+    std::filesystem::path library_location;
+#ifndef _WIN32
+    Dl_info address_info;
+    int res_val = dladdr(reinterpret_cast<void *>(QpSolversEigen::getPathOfQpSolversEigenSharedLibrary), &address_info);
+    if (address_info.dli_fname && res_val > 0)
+    {
+      library_location = address_info.dli_fname;
+    }
+    else
+    {
+      return {};
+    }
+#else
+    // See
+    char module_path[MAX_PATH];
+    HMODULE hm = NULL;
+
+    if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+        GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+        (LPCSTR) &QpSolversEigen::getPathOfQpSolversEigenSharedLibrary, &hm) == 0)
+    {
+        return {};
+    }
+    if (GetModuleFileNameA(hm, module_path, sizeof(module_path)) == 0)
+    {
+        return {};
+    }
+
+    library_location = std::string(module_path);
+#endif
+
+    const std::filesystem::path library_directory = library_location.parent_path();
+    return library_directory.string();
+}
 
 struct Solver::Impl
 {
@@ -43,9 +94,25 @@ bool Solver::instantiateSolver(std::string solverName)
     // Get the expected library name and factory name given the solver name
     std::string libraryName = getSharedlibppLibraryNameFromSolverName(solverName);
     std::string factoryName = getSharedlibppFactoryNameFromSolverName(solverName);
-    m_pimpl->solverFactory = std::make_unique<sharedlibpp::SharedLibraryClassFactory<QpSolversEigen::SolverInterface>>(libraryName.c_str(), factoryName.c_str());
+    m_pimpl->solverFactory = std::make_unique<sharedlibpp::SharedLibraryClassFactory<QpSolversEigen::SolverInterface>>(SHLIBPP_DEFAULT_START_CHECK,
+                                                                                                                       SHLIBPP_DEFAULT_END_CHECK,
+                                                                                                                       SHLIBPP_DEFAULT_SYSTEM_VERSION,
+                                                                                                                       factoryName.c_str());
 
-    if (!m_pimpl->solverFactory->isValid())
+    // Extend the search path of the plugins to include the install prefix of the library, this make sure that
+    // if the plugins and the core library are installed in the same directory, they are found out of the box
+    // if there are plugins in any other directory, the directory needs to be added to the SHLIBPP_PLUGIN_PATH
+    // env variable to be found
+    std::optional<std::string> pathOfQpSolversEigenSharedLib = getPathOfQpSolversEigenSharedLibrary();
+    if (pathOfQpSolversEigenSharedLib.has_value())
+    {
+        m_pimpl->solverFactory->extendSearchPath(pathOfQpSolversEigenSharedLib.value());
+    }
+
+    bool ok = m_pimpl->solverFactory->open(libraryName.c_str(), factoryName.c_str());
+    ok = ok && m_pimpl->solverFactory->isValid();
+
+    if (!ok)
     {
         debugStream() << "QpSolversEigen::Solver::initSolver: Failed to create factory for solver " << solverName << std::endl;
         debugStream() << "Factory error (" << static_cast<std::uint32_t>(m_pimpl->solverFactory->getStatus())

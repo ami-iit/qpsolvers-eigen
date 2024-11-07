@@ -31,7 +31,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Dependencies
 find_package(Eigen3 REQUIRED)
 
-
 set(QPSOLVERSEIGEN_USES_SYSTEM_SHAREDLIBPP_DEFAULT_VALUE OFF)
 if(NOT DEFINED QPSOLVERSEIGEN_USES_SYSTEM_SHAREDLIBPP)
     find_package(sharedlibpp QUIET)
@@ -69,7 +68,6 @@ else()
         include(${ycm_SOURCE_DIR}/tools/UseYCMFromSource.cmake)
     endif()
 endif()
-
 
 include(CMakePackageConfigHelpers)
 

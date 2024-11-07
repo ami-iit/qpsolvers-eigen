@@ -174,6 +174,11 @@ int main()
 
 For more examples, check the content of the [./examples](./examples) folder in this repo.
 
+
+### Migrate from osqp-eigen
+
+If you are already using `osqp-eigen` and you want to understand how to migrate your code to `qpsolvers-eigen`, check the [`./doc/migrate_from_osqp_eigen.md`](./doc/migrate_from_osqp_eigen.md) document.
+
 ## 🐛 Bug reports and support
 
 All types of [issues](https://github.com/ami-iit/qpsolvers-eigen/issues/new) are welcome.
