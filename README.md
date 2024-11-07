@@ -177,6 +177,16 @@ For more examples, check the content of the [./examples](./examples) folder in t
 
 If you are already using `osqp-eigen` and you want to understand how to migrate your code to `qpsolvers-eigen`, check the [`./docs/migrate_from_osqp_eigen.md`](./docs/migrate_from_osqp_eigen.md) document.
 
+### Related projects
+
+If you are interested to other projects that provide abstraction over QP solvers, you can check also this other projects:
+
+* [Python's `qpsolvers`](https://qpsolvers.github.io) : Python abstraction layer over QPs, quite complete and definitely an inspiration for `qpsolvers-eigen`.
+* [`isri-aist/QpSolverCollection`](https://github.com/isri-aist/QpSolverCollection) : Another C++ QP standalone abstraction layer, that supports more solvers w.r.t. to `qpsolvers-eigen`, but does not permit to easily set parameters to the underlying solvers.
+* [`RobotLocomotion/drake`](https://drake.mit.edu/doxygen_cxx/group__solvers.html) : Drake is a collection of tools for analyzing the dynamics of our robots and building control systems for them, with a heavy emphasis on optimization-based design/analysis. As part of its extensive capabilities, it also provide abstraction over QP solvers. However, it is quite an heavyweight dependency, and does not support Windows.
+* [`casadi`](https://web.casadi.org/docs/#quadratic-programming) CasADi is an open-source tool for nonlinear optimization and algorithmic differentiation. As part of its extensive capabilities, it also provide abstraction over QP solvers.
+* [`roboptim`](http://roboptim.net/) RobOptim is a C++ Library for Numerical Optimization applied to Robotics. Similarly to `casadi` or `qpsolvers-eigen`, it permits to write solvers as dynamically loadable plugins that can be loaded without modifying the core library. Mantainance of the library seems to be stopped around 2019.
+
 ## 🐛 Bug reports and support
 
 All types of [issues](https://github.com/ami-iit/qpsolvers-eigen/issues/new) are welcome.
