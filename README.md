@@ -181,7 +181,7 @@ If you are already using `osqp-eigen` and you want to understand how to migrate 
 
 If you are interested to other projects that provide abstraction over QP solvers, you can check also this other projects:
 
-* [Python's `qpsolvers`](https://qpsolvers.github.io) : Python abstraction layer over QPs, quite complete and definitely an inspiration for `qpsolvers-eigen`.
+* [Python's `qpsolvers`](https://qpsolvers.github.io/qpsolvers/) : Python abstraction layer over QPs, quite complete and definitely an inspiration for `qpsolvers-eigen`.
 * [`isri-aist/QpSolverCollection`](https://github.com/isri-aist/QpSolverCollection) : Another C++ QP standalone abstraction layer, that supports more solvers w.r.t. to `qpsolvers-eigen`, but does not permit to easily set parameters to the underlying solvers.
 * [`RobotLocomotion/drake`](https://drake.mit.edu/doxygen_cxx/group__solvers.html) : Drake is a collection of tools for analyzing the dynamics of our robots and building control systems for them, with a heavy emphasis on optimization-based design/analysis. As part of its extensive capabilities, it also provide abstraction over QP solvers. However, it is quite an heavyweight dependency, and does not support Windows.
 * [`casadi`](https://web.casadi.org/docs/#quadratic-programming) CasADi is an open-source tool for nonlinear optimization and algorithmic differentiation. As part of its extensive capabilities, it also provide abstraction over QP solvers.
