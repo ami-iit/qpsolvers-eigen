@@ -191,6 +191,10 @@ If you are interested to other projects that provide abstraction over QP solvers
 
 All types of [issues](https://github.com/ami-iit/qpsolvers-eigen/issues/new) are welcome.
 
+## Versioning policy
+
+Any ABI or API incompatible change will result in a minor release bump.
+
 ## 📝 License
 
 Materials in this repository are distributed under the following license:
