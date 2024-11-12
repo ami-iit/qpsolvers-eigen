@@ -319,10 +319,6 @@ bool OsqpSolver::setBooleanParameter(const std::string& settingName, bool value)
     {
         osqpEigenSolver.settings()->setWarmStart(value);
         return true;
-    } else if (settingName == "warm_start")
-    {
-        osqpEigenSolver.settings()->setWarmStart(value);
-        return true;
     } else if (settingName == "adaptive_rho")
     {
         osqpEigenSolver.settings()->setAdaptiveRho(value);
