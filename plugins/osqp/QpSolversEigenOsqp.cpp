@@ -319,7 +319,7 @@ bool OsqpSolver::setBooleanParameter(const std::string& settingName, bool value)
     {
         osqpEigenSolver.settings()->setWarmStart(value);
         return true;
-    } else if (settingName == "warm_start")
+    } else if (settingName == "warm_starting")
     {
         osqpEigenSolver.settings()->setWarmStart(value);
         return true;
