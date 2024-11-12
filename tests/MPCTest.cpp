@@ -285,10 +285,14 @@ TEST_CASE("MPCTest")
     // settings
     REQUIRE(solver.setBooleanParameter("verbose", false));
 
-    // Some parameters are only supported by osqp
+    // Set solver-specific parameters
     if (solver.getSolverName() == "osqp")
     {
         REQUIRE(solver.setBooleanParameter("warm_start", true));
+    }
+    if (solver.getSolverName() == "proxqp")
+    {
+        REQUIRE(solver.setStringParameter("initial_guess", "WARM_START_WITH_PREVIOUS_RESULT"));
     }
 
     // set the initial data of the QP solver

@@ -157,6 +157,11 @@ bool NullSolver::setRealNumberParameter(const std::string& settingName, double v
     return false;
 }
 
+bool NullSolver::setStringParameter(const std::string& parameterName, const std::string& value)
+{
+    return false;
+}
+
 SolverInterface* NullSolver::allocateInstance() const
 {
     return new NullSolver();

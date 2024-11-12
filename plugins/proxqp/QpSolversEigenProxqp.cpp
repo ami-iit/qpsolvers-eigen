@@ -102,6 +102,7 @@ public:
     bool setBooleanParameter(const std::string& settingName, bool value) override;
     bool setIntegerParameter(const std::string& settingName, int64_t value) override;
     bool setRealNumberParameter(const std::string& settingName, double value) override;
+    bool setStringParameter(const std::string& parameterName, const std::string& value) override;
     SolverInterface* allocateInstance() const override;
 };
 
@@ -532,6 +533,55 @@ bool ProxqpSolver::setRealNumberParameter(const std::string& settingName, double
     QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::setRealNumberParameter: unknown setting name: " << settingName << std::endl;
     return false;
 }
+
+bool ProxqpSolver::setStringParameter(const std::string& parameterName, const std::string& value)
+{
+    bool settingFound = false;
+    bool valueFound = false;
+
+    if (parameterName == "initial_guess")
+    {
+        settingFound = true;
+        if (value == "NO_INITIAL_GUESS")
+        {
+            proxqpSettings.initial_guess = proxsuite::proxqp::InitialGuessStatus::NO_INITIAL_GUESS;
+            valueFound = true;
+        } else if (value == "EQUALITY_CONSTRAINED_INITIAL_GUESS")
+        {
+            proxqpSettings.initial_guess = proxsuite::proxqp::InitialGuessStatus::EQUALITY_CONSTRAINED_INITIAL_GUESS;
+            valueFound = true;
+        } else if (value == "WARM_START_WITH_PREVIOUS_RESULT")
+        {
+            proxqpSettings.initial_guess = proxsuite::proxqp::InitialGuessStatus::WARM_START_WITH_PREVIOUS_RESULT;
+            valueFound = true;
+        } else if (value == "WARM_START")
+        {
+            proxqpSettings.initial_guess = proxsuite::proxqp::InitialGuessStatus::WARM_START;
+            valueFound = true;
+        } else if (value == "COLD_START_WITH_PREVIOUS_RESULT")
+        {
+            proxqpSettings.initial_guess = proxsuite::proxqp::InitialGuessStatus::COLD_START_WITH_PREVIOUS_RESULT;
+            valueFound = true;
+        }
+    }
+
+
+    if (settingFound && valueFound)
+    {
+        syncSettings();
+        return true;
+    }
+
+    if (!settingFound)
+    {
+        QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::setStringParameter: unknown setting name: " << parameterName << std::endl;
+    } else if (!valueFound)
+    {
+        QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::setStringParameter: unknown value << " << value << " for parameter with name: " << parameterName << std::endl;
+    }
+    return false;
+}
+
 
 SolverInterface* ProxqpSolver::allocateInstance() const
 {

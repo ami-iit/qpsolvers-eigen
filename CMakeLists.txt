@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16...3.31)
 
-project(QpSolversEigen VERSION 0.0.2)
+project(QpSolversEigen VERSION 0.1.0)
 
 include(GNUInstallDirs)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
