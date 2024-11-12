@@ -231,7 +231,7 @@ bool ProxqpSolver::updateLowerBound(const Eigen::Ref<const Eigen::Matrix<double,
 bool ProxqpSolver::updateUpperBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound)
 {
     bool ok = convertQpSolversEigenInftyToOsqpEigenInfty(upperBound, upperBoundBufferWithOsqpEigenInfty);
-    return ok && osqpEigenSolver.updateUpperBound(lowerBoundBufferWithOsqpEigenInfty);
+    return ok && osqpEigenSolver.updateUpperBound(upperBoundBufferWithOsqpEigenInfty);
 }
 
 bool ProxqpSolver::updateBounds(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound,
@@ -292,7 +292,7 @@ bool ProxqpSolver::setLowerBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic
 bool ProxqpSolver::setUpperBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBoundVector)
 {
     bool ok = convertQpSolversEigenInftyToOsqpEigenInfty(upperBoundVector, upperBoundBufferWithOsqpEigenInfty);
-    return osqpEigenSolver.data()->setUpperBound(upperBoundVector);
+    return osqpEigenSolver.data()->setUpperBound(upperBoundBufferWithOsqpEigenInfty);
 }
 
 bool ProxqpSolver::setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBound,
