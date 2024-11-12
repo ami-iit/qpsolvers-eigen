@@ -250,11 +250,19 @@ int main()
     }
 
     // settings
+
+    // solver.setBooleanParameter("verbose", false);
+
     // Set osqp-specific parameters
     if (solver.getSolverName() == "osqp")
     {
-        // solver.setBooleanParameter("verbose", false);
         solver.setBooleanParameter("warm_starting", true);
+    }
+
+    // Set proxqp-specific parameters
+    if (solver.getSolverName() == "proxqp")
+    {
+        solver.setStringParameter("initial_guess", "WARM_START_WITH_PREVIOUS_RESULT");
     }
 
     // set the initial data of the QP solver

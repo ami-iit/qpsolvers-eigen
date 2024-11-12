@@ -284,6 +284,11 @@ bool Solver::setRealNumberParameter(const std::string& parameterName, double val
     return m_pimpl->solver->setRealNumberParameter(parameterName, value);
 }
 
+bool Solver::setStringParameter(const std::string& parameterName, const std::string& value)
+{
+    return m_pimpl->solver->setStringParameter(parameterName, value);
+}
+
 Solver* Solver::data()
 {
     return this;

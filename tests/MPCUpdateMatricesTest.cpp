@@ -263,6 +263,14 @@ TEST_CASE("MPCTest Update matrices")
         REQUIRE(solver.setBooleanParameter("warm_start", true));
     }
 
+    if (solver.getSolverName() == "proxqp")
+    {
+        REQUIRE(solver.setStringParameter("initial_guess", "WARM_START_WITH_PREVIOUS_RESULT"));
+        // Check that setStringParameter fail for unknown setting or unknown value
+        REQUIRE_FALSE(solver.setStringParameter("initial_guess", "THIS_IS_NOT_A_VALID_INITIAL_GUESS_VALUE"));
+        REQUIRE_FALSE(solver.setStringParameter("this_is_not_a_valid_proqp_parameter_name", "THIS_IS_NOT_A_VALID_INITIAL_GUESS_VALUE"));
+    }
+
     // set the initial data of the QP solver
     solver.data()->setNumberOfVariables(2 * (mpcWindow + 1) + 1 * mpcWindow);
     solver.data()->setNumberOfConstraints(2 * (mpcWindow + 1));

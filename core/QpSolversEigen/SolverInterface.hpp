@@ -64,6 +64,7 @@ public:
     virtual bool setBooleanParameter(const std::string& settingName, bool value) = 0;
     virtual bool setIntegerParameter(const std::string& settingName, int64_t value) = 0;
     virtual bool setRealNumberParameter(const std::string& settingName, double value) = 0;
+    virtual bool setStringParameter(const std::string& settingName, const std::string& value) = 0;
 
     /**
      * Allocate a new instance of this class, and return a pointer to it.

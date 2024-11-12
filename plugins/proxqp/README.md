@@ -63,4 +63,6 @@ If you need support for more parameters, please open an issue.
 
 ### String parameters
 
-TODO
+| Name         | Notes                     |
+|:------------:|:-------------------------:|
+| `initial_guess`   | Possible values are `NO_INITIAL_GUESS`, `EQUALITY_CONSTRAINED_INITIAL_GUESS`, `WARM_START_WITH_PREVIOUS_RESULT`, `WARM_START` or `COLD_START_WITH_PREVIOUS_RESULT`.  See https://simple-robotics.github.io/proxsuite/md_doc_22-ProxQP__api.html#OverviewInitialGuess for more details. |

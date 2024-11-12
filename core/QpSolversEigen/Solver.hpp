@@ -276,6 +276,16 @@ public:
     bool setRealNumberParameter(const std::string& parameterName, double value);
 
     /**
+     * Set a string parameter.
+     *
+     * @note Sometimes Enum parameters in a specific solvers are wrapped as a string parameter.
+     *
+     * @param parameterName the name of the parameter to bet set.
+     * @return true/false in case of success/failure.
+     */
+    bool setStringParameter(const std::string& parameterName, const std::string& value);
+
+    /**
      * Return a pointer to this class.
      *
      * This is just for backward compatibility with OsqpEigen::Solver::data() method,

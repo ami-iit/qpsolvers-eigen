@@ -71,6 +71,7 @@ public:
     bool setBooleanParameter(const std::string& settingName, bool value) override;
     bool setIntegerParameter(const std::string& settingName, int64_t value) override;
     bool setRealNumberParameter(const std::string& settingName, double value) override;
+    bool setStringParameter(const std::string& parameterName, const std::string& value) override;
     SolverInterface* allocateInstance() const override;
 };
 
@@ -416,6 +417,13 @@ bool OsqpSolver::setRealNumberParameter(const std::string& settingName, double v
     QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::setRealNumberParameter: unknown setting name: " << settingName << std::endl;
     return false;
 }
+
+bool OsqpSolver::setStringParameter(const std::string& parameterName, const std::string& value)
+{
+    QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::setStringParameter: unknown setting name: " << parameterName << std::endl;
+    return false;
+}
+
 
 SolverInterface* OsqpSolver::allocateInstance() const
 {
