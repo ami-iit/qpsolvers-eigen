@@ -72,6 +72,12 @@ public:
     bool setIntegerParameter(const std::string& settingName, int64_t value) override;
     bool setRealNumberParameter(const std::string& settingName, double value) override;
     bool setStringParameter(const std::string& parameterName, const std::string& value) override;
+
+    bool getBooleanParametersNames(std::vector<std::string>& parametersNames) const override;
+    bool getIntegerParametersNames(std::vector<std::string>& parameterNames) const override;
+    bool getRealNumberParametersNames(std::vector<std::string>& parametersNames) const override;
+    bool getStringParametersNames(std::vector<std::string>& parametersNames) const override;
+
     SolverInterface* allocateInstance() const override;
 };
 
@@ -424,6 +430,51 @@ bool OsqpSolver::setStringParameter(const std::string& parameterName, const std:
     return false;
 }
 
+bool OsqpSolver::getBooleanParametersNames(std::vector<std::string>& parametersNames) const
+{
+    parametersNames.resize(0);
+    parametersNames.push_back("polish");
+    parametersNames.push_back("verbose");
+    parametersNames.push_back("scaled_termination");
+    parametersNames.push_back("warm_start");
+    parametersNames.push_back("warm_starting");
+    parametersNames.push_back("adaptive_rho");
+    return true;
+}
+
+bool OsqpSolver::getIntegerParametersNames(std::vector<std::string>& parametersNames) const
+{
+    parametersNames.resize(0);
+    parametersNames.push_back("scaling");
+    parametersNames.push_back("adaptive_rho_interval");
+    parametersNames.push_back("max_iter");
+    parametersNames.push_back("polish_refine_iter");
+    parametersNames.push_back("linsys_solver");
+    parametersNames.push_back("check_termination");
+    return true;
+}
+
+bool OsqpSolver::getRealNumberParametersNames(std::vector<std::string>& parametersNames) const
+{
+    parametersNames.resize(0);
+    parametersNames.push_back("rho");
+    parametersNames.push_back("sigma");
+    parametersNames.push_back("adaptive_rho_tolerance");
+    parametersNames.push_back("adaptive_rho_fraction");
+    parametersNames.push_back("eps_abs");
+    parametersNames.push_back("eps_rel");
+    parametersNames.push_back("eps_prim_inf");
+    parametersNames.push_back("eps_dual_inf");
+    parametersNames.push_back("alpha");
+    parametersNames.push_back("delta");
+    return true;
+}
+
+bool OsqpSolver::getStringParametersNames(std::vector<std::string>& parametersNames) const
+{
+    parametersNames.resize(0);
+    return true;
+}
 
 SolverInterface* OsqpSolver::allocateInstance() const
 {

@@ -66,6 +66,11 @@ public:
     virtual bool setRealNumberParameter(const std::string& settingName, double value) = 0;
     virtual bool setStringParameter(const std::string& settingName, const std::string& value) = 0;
 
+    virtual bool getBooleanParametersNames(std::vector<std::string>& parametersNames) const = 0;
+    virtual bool getIntegerParametersNames(std::vector<std::string>& parameterNames) const = 0;
+    virtual bool getRealNumberParametersNames(std::vector<std::string>& parametersNames) const = 0;
+    virtual bool getStringParametersNames(std::vector<std::string>& parametersNames) const = 0;
+
     /**
      * Allocate a new instance of this class, and return a pointer to it.
      * The ownership of the pointer is transferred to the caller.
