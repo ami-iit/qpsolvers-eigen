@@ -286,6 +286,35 @@ public:
     bool setStringParameter(const std::string& parameterName, const std::string& value);
 
     /**
+     * Get the names of all the boolean parameters supported by the solver.
+     * @param parametersNames the names of all the boolean parameters supported by the solver.
+     * @return true/false in case of success/failure.
+     */
+    bool getBooleanParametersNames(std::vector<std::string>& parametersNames) const;
+
+    /**
+     * Get the names of all the integer parameters supported by the solver.
+     * @param parametersNames the names of all the integer parameters supported by the solver.
+     * @return true/false in case of success/failure.
+     */
+    bool getIntegerParametersNames(std::vector<std::string>& parameterNames) const;
+
+    /**
+     * Get the names of all the real number parameters supported by the solver.
+     * @param parametersNames the names of all the real number parameters supported by the solver.
+     * @return true/false in case of success/failure.
+     */
+    bool getRealNumberParametersNames(std::vector<std::string>& parametersNames) const;
+
+    /**
+     * Get the names of all the string parameters supported by the solver.
+     * @param parametersNames the names of all the string parameters supported by the solver.
+     * @return true/false in case of success/failure.
+     */
+    bool getStringParametersNames(std::vector<std::string>& parametersNames) const ;
+
+
+    /**
      * Return a pointer to this class.
      *
      * This is just for backward compatibility with OsqpEigen::Solver::data() method,

@@ -34,9 +34,22 @@ TEST_CASE("QPProblem - Unconstrained")
     REQUIRE(solver.instantiateSolver(solverName));
 
     REQUIRE(solver.setBooleanParameter("verbose", true));
+
+    // Verify that verbose parameters is reported as a supperted parameter
+    std::vector<std::string> parametersNames;
+    REQUIRE(solver.getBooleanParametersNames(parametersNames));
+    REQUIRE(std::find(parametersNames.begin(), parametersNames.end(), "verbose") != parametersNames.end());
+
+    // Check that a non-supported parameter is not reported
+    REQUIRE(std::find(parametersNames.begin(), parametersNames.end(), "this_is_not_a_supported_parameter") == parametersNames.end());
+
     if (solver.getSolverName() == "osqp")
     {
         REQUIRE(solver.setRealNumberParameter("alpha", 1.0));
+
+        REQUIRE(solver.getRealNumberParametersNames(parametersNames));
+        REQUIRE(std::find(parametersNames.begin(), parametersNames.end(), "alpha") != parametersNames.end());
+
     }
 
     solver.setNumberOfVariables(2);

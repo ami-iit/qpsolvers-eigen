@@ -162,6 +162,26 @@ bool NullSolver::setStringParameter(const std::string& parameterName, const std:
     return false;
 }
 
+bool NullSolver::getBooleanParametersNames(std::vector<std::string>& parametersNames) const
+{
+    return false;
+}
+
+bool NullSolver::getIntegerParametersNames(std::vector<std::string>& parametersNames) const
+{
+    return false;
+}
+
+bool NullSolver::getRealNumberParametersNames(std::vector<std::string>& parametersNames) const
+{
+    return false;
+}
+
+bool NullSolver::getStringParametersNames(std::vector<std::string>& parametersNames) const
+{
+    return false;
+}
+
 SolverInterface* NullSolver::allocateInstance() const
 {
     return new NullSolver();

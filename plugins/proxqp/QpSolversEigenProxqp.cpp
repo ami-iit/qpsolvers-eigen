@@ -103,6 +103,12 @@ public:
     bool setIntegerParameter(const std::string& settingName, int64_t value) override;
     bool setRealNumberParameter(const std::string& settingName, double value) override;
     bool setStringParameter(const std::string& parameterName, const std::string& value) override;
+
+    bool getBooleanParametersNames(std::vector<std::string>& parametersNames) const override;
+    bool getIntegerParametersNames(std::vector<std::string>& parametersNames) const override;
+    bool getRealNumberParametersNames(std::vector<std::string>& parametersNames) const override;
+    bool getStringParametersNames(std::vector<std::string>& parametersNames) const override;
+
     SolverInterface* allocateInstance() const override;
 };
 
@@ -582,6 +588,65 @@ bool ProxqpSolver::setStringParameter(const std::string& parameterName, const st
     return false;
 }
 
+bool ProxqpSolver::getBooleanParametersNames(std::vector<std::string>& parametersNames) const
+{
+    parametersNames.clear();
+    parametersNames.push_back("verbose");
+    parametersNames.push_back("update_preconditioner");
+    parametersNames.push_back("compute_preconditioner");
+    parametersNames.push_back("compute_timings");
+    parametersNames.push_back("check_duality_gap");
+    parametersNames.push_back("bcl_update");
+    parametersNames.push_back("primal_infeasibility_solving");
+    return true;
+}
+
+bool ProxqpSolver::getIntegerParametersNames(std::vector<std::string>& parametersNames) const
+{
+    parametersNames.clear();
+    parametersNames.push_back("max_iter");
+    parametersNames.push_back("max_iter_in");
+    parametersNames.push_back("safe_guard");
+    parametersNames.push_back("nb_iterative_refinement");
+    parametersNames.push_back("preconditioner_max_iter");
+    parametersNames.push_back("frequence_infeasibility_check");
+    return true;
+}
+
+bool ProxqpSolver::getRealNumberParametersNames(std::vector<std::string>& parametersNames) const
+{
+    parametersNames.clear();
+    parametersNames.push_back("default_mu_eq");
+    parametersNames.push_back("default_mu_in");
+    parametersNames.push_back("alpha_bcl");
+    parametersNames.push_back("beta_bcl");
+    parametersNames.push_back("refactor_dual_feasibility_threshold");
+    parametersNames.push_back("refactor_rho_threshold");
+    parametersNames.push_back("mu_min_in");
+    parametersNames.push_back("mu_max_eq_inv");
+    parametersNames.push_back("mu_max_in_inv");
+    parametersNames.push_back("mu_update_factor");
+    parametersNames.push_back("cold_reset_mu_eq");
+    parametersNames.push_back("cold_reset_mu_in");
+    parametersNames.push_back("cold_reset_mu_eq_inv");
+    parametersNames.push_back("cold_reset_mu_in_inv");
+    parametersNames.push_back("eps_abs");
+    parametersNames.push_back("eps_rel");
+    parametersNames.push_back("eps_refact");
+    parametersNames.push_back("eps_duality_gap_abs");
+    parametersNames.push_back("eps_duality_gap_rel");
+    parametersNames.push_back("preconditioner_accuracy");
+    parametersNames.push_back("alpha_gpdal");
+    parametersNames.push_back("default_H_eigenvalue_estimate");
+    return true;
+}
+
+bool ProxqpSolver::getStringParametersNames(std::vector<std::string>& parametersNames) const
+{
+    parametersNames.clear();
+    parametersNames.push_back("initial_guess");
+    return true;
+}
 
 SolverInterface* ProxqpSolver::allocateInstance() const
 {

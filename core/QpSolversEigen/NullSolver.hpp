@@ -66,6 +66,12 @@ public:
     bool setIntegerParameter(const std::string& settingName, int64_t value) override;
     bool setRealNumberParameter(const std::string& settingName, double value) override;
     bool setStringParameter(const std::string& parameterName, const std::string& value) override;
+
+    bool getBooleanParametersNames(std::vector<std::string>& parametersNames) const override;
+    bool getIntegerParametersNames(std::vector<std::string>& parameterNames) const override;
+    bool getRealNumberParametersNames(std::vector<std::string>& parametersNames) const override;
+    bool getStringParametersNames(std::vector<std::string>& parametersNames) const override;
+
     SolverInterface* allocateInstance() const override;
 };
 

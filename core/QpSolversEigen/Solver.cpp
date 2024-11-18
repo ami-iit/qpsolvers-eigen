@@ -289,6 +289,27 @@ bool Solver::setStringParameter(const std::string& parameterName, const std::str
     return m_pimpl->solver->setStringParameter(parameterName, value);
 }
 
+bool Solver::getBooleanParametersNames(std::vector<std::string>& parametersNames) const
+{
+    return m_pimpl->solver->getBooleanParametersNames(parametersNames);
+}
+
+bool Solver::getIntegerParametersNames(std::vector<std::string>& parameterNames) const
+{
+    return m_pimpl->solver->getIntegerParametersNames(parameterNames);
+}
+
+bool Solver::getRealNumberParametersNames(std::vector<std::string>& parametersNames) const
+{
+    return m_pimpl->solver->getRealNumberParametersNames(parametersNames);
+}
+
+bool Solver::getStringParametersNames(std::vector<std::string>& parametersNames) const
+{
+    return m_pimpl->solver->getStringParametersNames(parametersNames);
+}
+
+
 Solver* Solver::data()
 {
     return this;
