@@ -590,7 +590,7 @@ bool ProxqpSolver::setStringParameter(const std::string& parameterName, const st
 
 bool ProxqpSolver::getBooleanParametersNames(std::vector<std::string>& parametersNames) const
 {
-    parametersNames.resize(0);
+    parametersNames.clear();
     parametersNames.push_back("verbose");
     parametersNames.push_back("update_preconditioner");
     parametersNames.push_back("compute_preconditioner");
@@ -603,7 +603,7 @@ bool ProxqpSolver::getBooleanParametersNames(std::vector<std::string>& parameter
 
 bool ProxqpSolver::getIntegerParametersNames(std::vector<std::string>& parametersNames) const
 {
-    parametersNames.resize(0);
+    parametersNames.clear();
     parametersNames.push_back("max_iter");
     parametersNames.push_back("max_iter_in");
     parametersNames.push_back("safe_guard");
@@ -615,7 +615,7 @@ bool ProxqpSolver::getIntegerParametersNames(std::vector<std::string>& parameter
 
 bool ProxqpSolver::getRealNumberParametersNames(std::vector<std::string>& parametersNames) const
 {
-    parametersNames.resize(0);
+    parametersNames.clear();
     parametersNames.push_back("default_mu_eq");
     parametersNames.push_back("default_mu_in");
     parametersNames.push_back("alpha_bcl");
@@ -643,7 +643,7 @@ bool ProxqpSolver::getRealNumberParametersNames(std::vector<std::string>& parame
 
 bool ProxqpSolver::getStringParametersNames(std::vector<std::string>& parametersNames) const
 {
-    parametersNames.resize(0);
+    parametersNames.clear();
     parametersNames.push_back("initial_guess");
     return true;
 }

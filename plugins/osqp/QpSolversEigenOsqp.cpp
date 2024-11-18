@@ -432,7 +432,7 @@ bool OsqpSolver::setStringParameter(const std::string& parameterName, const std:
 
 bool OsqpSolver::getBooleanParametersNames(std::vector<std::string>& parametersNames) const
 {
-    parametersNames.resize(0);
+    parametersNames.clear();
     parametersNames.push_back("polish");
     parametersNames.push_back("verbose");
     parametersNames.push_back("scaled_termination");
@@ -444,7 +444,7 @@ bool OsqpSolver::getBooleanParametersNames(std::vector<std::string>& parametersN
 
 bool OsqpSolver::getIntegerParametersNames(std::vector<std::string>& parametersNames) const
 {
-    parametersNames.resize(0);
+    parametersNames.clear();
     parametersNames.push_back("scaling");
     parametersNames.push_back("adaptive_rho_interval");
     parametersNames.push_back("max_iter");
@@ -456,7 +456,7 @@ bool OsqpSolver::getIntegerParametersNames(std::vector<std::string>& parametersN
 
 bool OsqpSolver::getRealNumberParametersNames(std::vector<std::string>& parametersNames) const
 {
-    parametersNames.resize(0);
+    parametersNames.clear();
     parametersNames.push_back("rho");
     parametersNames.push_back("sigma");
     parametersNames.push_back("adaptive_rho_tolerance");
@@ -472,7 +472,7 @@ bool OsqpSolver::getRealNumberParametersNames(std::vector<std::string>& paramete
 
 bool OsqpSolver::getStringParametersNames(std::vector<std::string>& parametersNames) const
 {
-    parametersNames.resize(0);
+    parametersNames.clear();
     return true;
 }
 
