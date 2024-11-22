@@ -8,9 +8,6 @@ Please install the library following one (and just one) method listed below.
 
 #### 📦 Install with conda or pixi (recommended)
 
-> [!WARNING]
-> This section is just a preview, as the library is not packaged in conda-forge. Once the library is packaged, we will remove this warning.
-
 You can easily the library with [`conda`](https://github.com/conda-forge/qpsolvers-eigen-feedstock) in a new conda environment with
 ```
 conda create -n newenvname -c conda-forge qpsolvers-eigen
