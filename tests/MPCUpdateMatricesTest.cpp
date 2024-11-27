@@ -301,19 +301,25 @@ TEST_CASE("MPCTest Update matrices")
         setDynamicsMatrices(a, b, c, i * T);
 
         // update the constraint bound
+        std::cerr << "=======> Update hessian " << std::endl;
         REQUIRE(updateHessianMatrix(solver, Q, R, mpcWindow, i));
+            std::cerr << "=======> Update linear " << std::endl;
         REQUIRE(updateLinearConstraintsMatrix(solver, mpcWindow, i));
 
         castMPCToQPGradient(Q, yRef, mpcWindow, i, gradient);
+            std::cerr << "=======> Update gradient " << std::endl;
         REQUIRE(solver.updateGradient(gradient));
 
         updateConstraintVectors(x0, lowerBound, upperBound);
+            std::cerr << "=======> updateBoundsn " << std::endl;
         REQUIRE(solver.updateBounds(lowerBound, upperBound));
 
         // solve the QP problem
+                std::cerr << "=======> solveProblem " << std::endl;
         REQUIRE(solver.solveProblem() == QpSolversEigen::ErrorExitFlag::NoError);
 
         // get the controller input
+            std::cerr << "=======> get solution " << std::endl;
         QPSolution = solver.getSolution();
         ctr = QPSolution.block(2 * (mpcWindow + 1), 0, 1, 1);
 
