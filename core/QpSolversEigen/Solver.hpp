@@ -172,6 +172,10 @@ public:
     updateBounds(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound,
                  const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound);
 
+    bool updateEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix);
+
+    bool updateEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector);
+
     /**
      * Clear the hessian matrix.
      */
@@ -193,6 +197,8 @@ public:
      * @param m is the number of constraints.
      */
     void setNumberOfConstraints(int m);
+
+    void setNumberOfEqualityConstraints(int m);
 
     /**
      * Set the quadratic part of the cost function (Hessian).
@@ -253,6 +259,10 @@ public:
      */
     bool setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBound,
                    Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBound);
+
+    bool setEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix);
+
+    bool setEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector);
 
     /**
      * Set a boolean parameter.

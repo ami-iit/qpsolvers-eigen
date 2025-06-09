@@ -212,6 +212,16 @@ Solver::updateBounds(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic
     return m_pimpl->solver->updateBounds(lowerBound, upperBound);
 }
 
+bool Solver::updateEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix)
+{
+    return m_pimpl->solver->updateEqualityConstraintsMatrix(equalityConstraintsMatrix);
+}
+
+bool Solver::updateEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector)
+{
+    return m_pimpl->solver->updateEqualityConstraintsVector(equalityConstraintsVector);
+}
+
 void Solver::clearHessianMatrix()
 {
     return m_pimpl->solver->clearHessianMatrix();
@@ -230,6 +240,11 @@ void Solver::setNumberOfVariables(int n)
 void Solver::setNumberOfConstraints(int m)
 {
     return m_pimpl->solver->setNumberOfConstraints(m);
+}
+
+void Solver::setNumberOfEqualityConstraints(int m)
+{
+    return m_pimpl->solver->setNumberOfEqualityConstraints(m);
 }
 
 bool Solver::setHessianMatrix(const Eigen::SparseMatrix<double>& hessianMatrix)
@@ -267,6 +282,16 @@ bool Solver::setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowe
                Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBound)
 {
     return m_pimpl->solver->setBounds(lowerBound, upperBound);
+}
+
+bool Solver::setEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix)
+{
+    return m_pimpl->solver->setEqualityConstraintsMatrix(equalityConstraintsMatrix);
+}
+
+bool Solver::setEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector)
+{
+    return m_pimpl->solver->setEqualityConstraintsVector(equalityConstraintsVector);
 }
 
 bool Solver::setBooleanParameter(const std::string& parameterName, bool value)

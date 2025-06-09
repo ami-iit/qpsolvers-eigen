@@ -51,11 +51,14 @@ public:
     bool updateUpperBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound) override;
     bool updateBounds(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound,
                  const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound) override;
+    bool updateEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix) override;
+    bool updateEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector) override;
 
     void clearHessianMatrix() override;
     void clearLinearConstraintsMatrix() override;
     void setNumberOfVariables(int n) override;
     void setNumberOfConstraints(int m) override;
+    void setNumberOfEqualityConstraints(int m) override;
     bool setHessianMatrix(const Eigen::SparseMatrix<double>& hessianMatrix) override;
     bool setGradient(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> gradientVector) override;
 
@@ -67,6 +70,8 @@ public:
     bool setUpperBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBoundVector) override;
     bool setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBound,
                    Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBound) override;
+    bool setEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix) override;
+    bool setEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector) override;
 
     bool setBooleanParameter(const std::string& settingName, bool value) override;
     bool setIntegerParameter(const std::string& settingName, int64_t value) override;
@@ -245,6 +250,20 @@ bool OsqpSolver::updateBounds(const Eigen::Ref<const Eigen::Matrix<double, Eigen
     return osqpEigenSolver.updateBounds(lowerBoundBufferWithOsqpEigenInfty, upperBoundBufferWithOsqpEigenInfty);
 }
 
+bool OsqpSolver::updateEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix)
+{
+    // OsqpEigen does not support equality constraints, so we return false
+    QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::updateEqualityConstraintsMatrix: OsqpEigen does not support equality constraints." << std::endl;
+    return false;
+}
+
+bool OsqpSolver::updateEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector)
+{
+    // OsqpEigen does not support equality constraints, so we return false
+    QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::updateEqualityConstraintsVector: OsqpEigen does not support equality constraints." << std::endl;
+    return false;
+}
+
 void OsqpSolver::clearHessianMatrix()
 {
     return osqpEigenSolver.data()->clearHessianMatrix();
@@ -263,6 +282,10 @@ void OsqpSolver::setNumberOfVariables(int n)
 void OsqpSolver::setNumberOfConstraints(int m)
 {
     return osqpEigenSolver.data()->setNumberOfConstraints(m);
+}
+
+void OsqpSolver::setNumberOfEqualityConstraints(int m)
+{
 }
 
 bool OsqpSolver::setHessianMatrix(const Eigen::SparseMatrix<double>& hessianMatrix)
@@ -304,6 +327,20 @@ bool OsqpSolver::setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> 
     bool ok = convertQpSolversEigenInftyToOsqpEigenInfty(lowerBound, lowerBoundBufferWithOsqpEigenInfty);
     ok = ok &&  convertQpSolversEigenInftyToOsqpEigenInfty(upperBound, upperBoundBufferWithOsqpEigenInfty);
     return osqpEigenSolver.data()->setBounds(lowerBoundBufferWithOsqpEigenInfty, upperBoundBufferWithOsqpEigenInfty);
+}
+
+bool OsqpSolver::setEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix)
+{
+    // OsqpEigen does not support equality constraints, so we return false
+    QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::setEqualityConstraintsMatrix: OsqpEigen does not support equality constraints." << std::endl;
+    return false;
+}
+
+bool OsqpSolver::setEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector)
+{
+    // OsqpEigen does not support equality constraints, so we return false
+    QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::setEqualityConstraintsVector: OsqpEigen does not support equality constraints." << std::endl;
+    return false;
 }
 
 bool OsqpSolver::setBooleanParameter(const std::string& settingName, bool value)

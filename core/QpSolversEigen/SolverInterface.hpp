@@ -44,11 +44,14 @@ public:
     virtual bool updateUpperBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound) = 0;
     virtual bool updateBounds(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound,
                  const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound) = 0;
+    virtual bool updateEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix) = 0;
+    virtual bool updateEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector) = 0;
 
     virtual void clearHessianMatrix() = 0;
     virtual void clearLinearConstraintsMatrix() = 0;
     virtual void setNumberOfVariables(int n) = 0;
     virtual void setNumberOfConstraints(int m) = 0;
+    virtual void setNumberOfEqualityConstraints(int m) = 0;
     virtual bool setHessianMatrix(const Eigen::SparseMatrix<double>& hessianMatrix) = 0;
     virtual bool setGradient(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> gradientVector) = 0;
 
@@ -60,6 +63,8 @@ public:
     virtual bool setUpperBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBoundVector) = 0;
     virtual bool setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBound,
                    Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBound) = 0;
+    virtual bool setEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix) = 0;
+    virtual bool setEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector) = 0;
 
     virtual bool setBooleanParameter(const std::string& settingName, bool value) = 0;
     virtual bool setIntegerParameter(const std::string& settingName, int64_t value) = 0;
