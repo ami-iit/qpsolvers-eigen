@@ -274,7 +274,7 @@ TEST_CASE("MPCTest")
 
 
     // instantiate the solver
-    std::string solverName = "proxqp";
+    std::string solverName = QPSOLVERSEIGEN_SOLVERS_TO_TEST;
     QpSolversEigen::Solver solver;
     REQUIRE(solver.instantiateSolver(solverName));
 
