@@ -39,7 +39,7 @@ public:
     const Eigen::Matrix<double, Eigen::Dynamic, 1>& getSolution() override;
     const Eigen::Matrix<double, Eigen::Dynamic, 1>& getDualSolution() override;
     bool updateHessianMatrix(const Eigen::SparseMatrix<double> &hessianMatrix) override;
-    bool updateLinearConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix) override;
+    bool updateInequalityConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix) override;
     bool updateGradient(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& gradient) override;
     bool updateLowerBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound) override;
     bool updateUpperBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound) override;
@@ -51,7 +51,7 @@ public:
     void clearHessianMatrix() override;
     void clearLinearConstraintsMatrix() override;
     void setNumberOfVariables(int n) override;
-    void setNumberOfConstraints(int m) override;
+    void setNumberOfInequalityConstraints(int m) override;
     void setNumberOfEqualityConstraints(int m) override;
     bool setHessianMatrix(const Eigen::SparseMatrix<double>& hessianMatrix) override;
     bool setGradient(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> gradientVector) override;
@@ -59,7 +59,7 @@ public:
     Eigen::Matrix<double, Eigen::Dynamic, 1> getGradient() override;
 
     bool
-    setLinearConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix) override;
+    setInequalityConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix) override;
     bool setLowerBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBoundVector) override;
     bool setUpperBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBoundVector) override;
     bool setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBound,

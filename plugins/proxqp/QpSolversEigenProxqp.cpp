@@ -70,7 +70,7 @@ public:
 
     std::string getSolverName() const override;
     void setNumberOfVariables(int n) override;
-    void setNumberOfConstraints(int m) override;
+    void setNumberOfInequalityConstraints(int m) override;
     void setNumberOfEqualityConstraints(int m) override;
     bool initSolver() override;
     bool isInitialized() override;
@@ -82,7 +82,7 @@ public:
     const Eigen::Matrix<double, Eigen::Dynamic, 1>& getSolution() override;
     const Eigen::Matrix<double, Eigen::Dynamic, 1>& getDualSolution() override;
     bool updateHessianMatrix(const Eigen::SparseMatrix<double> &hessianMatrix) override;
-    bool updateLinearConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix) override;
+    bool updateInequalityConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix) override;
     bool updateGradient(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& gradient) override;
     bool updateLowerBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound) override;
     bool updateUpperBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound) override;
@@ -99,7 +99,7 @@ public:
     Eigen::Matrix<double, Eigen::Dynamic, 1> getGradient() override;
 
     bool
-    setLinearConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix) override;
+    setInequalityConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix) override;
     bool setLowerBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBoundVector) override;
     bool setUpperBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBoundVector) override;
     bool setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBound,
@@ -163,7 +163,7 @@ void ProxqpSolver::setNumberOfVariables(int n)
     initialSparseSolverData.numberOfVariables = n;
 }
 
-void ProxqpSolver::setNumberOfConstraints(int m)
+void ProxqpSolver::setNumberOfInequalityConstraints(int m)
 {
     initialSparseSolverData.numberOfInequalityConstraints = m;
 }
@@ -261,7 +261,7 @@ bool ProxqpSolver::updateHessianMatrix(const Eigen::SparseMatrix<double> &hessia
     return true;
 }
 
-bool ProxqpSolver::updateLinearConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix)
+bool ProxqpSolver::updateInequalityConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix)
 {
     proxqpSparseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
                                proxsuite::nullopt, proxsuite::nullopt,
@@ -351,7 +351,7 @@ Eigen::Matrix<double, Eigen::Dynamic, 1> ProxqpSolver::getGradient()
 }
 
 bool
-ProxqpSolver::setLinearConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix)
+ProxqpSolver::setInequalityConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix)
 {
     initialSparseSolverData.C = linearConstraintsMatrix;
     initialSparseSolverData.isLinearConstraintsSet = true;

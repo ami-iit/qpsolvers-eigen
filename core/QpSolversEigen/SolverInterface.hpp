@@ -38,7 +38,7 @@ public:
     virtual const Eigen::Matrix<double, Eigen::Dynamic, 1>& getSolution() = 0;
     virtual  const Eigen::Matrix<double, Eigen::Dynamic, 1>& getDualSolution() = 0;
     virtual bool updateHessianMatrix(const Eigen::SparseMatrix<double> &hessianMatrix) = 0;
-    virtual bool updateLinearConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix) = 0;
+    virtual bool updateInequalityConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix) = 0;
     virtual bool updateGradient(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& gradient) = 0;
     virtual bool updateLowerBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound) = 0;
     virtual bool updateUpperBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound) = 0;
@@ -50,7 +50,7 @@ public:
     virtual void clearHessianMatrix() = 0;
     virtual void clearLinearConstraintsMatrix() = 0;
     virtual void setNumberOfVariables(int n) = 0;
-    virtual void setNumberOfConstraints(int m) = 0;
+    virtual void setNumberOfInequalityConstraints(int m) = 0;
     virtual void setNumberOfEqualityConstraints(int m) = 0;
     virtual bool setHessianMatrix(const Eigen::SparseMatrix<double>& hessianMatrix) = 0;
     virtual bool setGradient(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> gradientVector) = 0;
@@ -58,7 +58,7 @@ public:
     virtual Eigen::Matrix<double, Eigen::Dynamic, 1> getGradient() = 0;
 
     virtual bool
-    setLinearConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix) = 0;
+    setInequalityConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix) = 0;
     virtual bool setLowerBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBoundVector) = 0;
     virtual bool setUpperBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBoundVector) = 0;
     virtual bool setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBound,

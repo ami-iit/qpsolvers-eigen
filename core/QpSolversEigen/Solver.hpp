@@ -124,7 +124,20 @@ public:
      * @param linearConstraintsMatrix is the linear constraint matrix A
      * @return true/false in case of success/failure.
      */
+    [[deprecated("Use updateInequalityConstraintsMatrix() instead.")]]
     bool updateLinearConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix);
+
+    /**
+     * Update the linear constraints matrix (A)
+     * \note
+     * If the sparsity pattern is preserved the matrix is simply update
+     * otherwise the entire solver will be reinitialized. In this case
+     * the primal and dual variable are copied in the new workspace.
+     *
+     * @param linearConstraintsMatrix is the linear constraint matrix A
+     * @return true/false in case of success/failure.
+     */
+    bool updateInequalityConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix);
 
     /**
      * Update the linear part of the cost function (Gradient).
@@ -193,11 +206,22 @@ public:
     void setNumberOfVariables(int n);
 
     /**
-     * Set the number of constraints.
-     * @param m is the number of constraints.
+     * Set the number of inequality constraints.
+     * @param m is the number of inequality constraints.
      */
+    [[deprecated("Use setNumberOfInequalityConstraints() instead.")]]
     void setNumberOfConstraints(int m);
 
+    /**
+     * Set the number of inequality constraints.
+     * @param m is the number of inequality constraints.
+     */
+    void setNumberOfInequalityConstraints(int m);
+
+    /**
+     * Set the number of equality constraints.
+     * @param m is the number of equality constraints.
+     */
     void setNumberOfEqualityConstraints(int m);
 
     /**
@@ -222,11 +246,20 @@ public:
 
     /**
      * Set the linear constraint matrix A (size m x n)
-     * @param linearConstraintsMatrix is the linear constraints matrix A.
+     * @param inequalityConstraintsMatrix is the linear constraints matrix A.
+     * @return true/false in case of success/failure.
+     */
+    [[deprecated("Use setInequalityConstraintsMatrix() instead.")]]
+    bool
+    setLinearConstraintsMatrix(const Eigen::SparseMatrix<double>& inequalityConstraintsMatrix);
+
+    /**
+     * Set the linear constraints matrix A (size m x n)
+     * @param inequalityConstraintsMatrix is the linear constraints matrix A.
      * @return true/false in case of success/failure.
      */
     bool
-    setLinearConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix);
+    setInequalityConstraintsMatrix(const Eigen::SparseMatrix<double>& inequalityConstraintsMatrix);
 
     /**
      * Set the array for lower bound (size m).
@@ -260,8 +293,18 @@ public:
     bool setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBound,
                    Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBound);
 
+    /**
+     * Set the equality constraints matrix (size p x n).
+     * @param equalityConstraintsMatrix is the equality constraints matrix A.
+     * @return true/false in case of success/failure.
+     */
     bool setEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix);
 
+    /**
+     * Set the equality constraints vector (size p x 1).
+     * @param equalityConstraintsVector is the equality constraints vector.
+     * @return true/false in case of success/failure.
+     */
     bool setEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector);
 
     /**

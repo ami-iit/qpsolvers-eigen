@@ -182,9 +182,15 @@ bool Solver::updateHessianMatrix(const Eigen::SparseMatrix<double> &hessianMatri
     return m_pimpl->solver->updateHessianMatrix(hessianMatrix);
 }
 
+[[deprecated("Use updateInequalityConstraintsMatrix() instead.")]]
 bool Solver::updateLinearConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix)
 {
-    return m_pimpl->solver->updateLinearConstraintsMatrix(linearConstraintsMatrix);
+    return m_pimpl->solver->updateInequalityConstraintsMatrix(linearConstraintsMatrix);
+}
+
+bool Solver::updateInequalityConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix)
+{
+    return m_pimpl->solver->updateInequalityConstraintsMatrix(linearConstraintsMatrix);
 }
 
 bool
@@ -237,9 +243,15 @@ void Solver::setNumberOfVariables(int n)
     return m_pimpl->solver->setNumberOfVariables(n);
 }
 
+[[deprecated("Use setNumberOfInequalityConstraints() instead.")]]
 void Solver::setNumberOfConstraints(int m)
 {
-    return m_pimpl->solver->setNumberOfConstraints(m);
+    return m_pimpl->solver->setNumberOfInequalityConstraints(m);
+}
+
+void Solver::setNumberOfInequalityConstraints(int m)
+{
+    return m_pimpl->solver->setNumberOfInequalityConstraints(m);
 }
 
 void Solver::setNumberOfEqualityConstraints(int m)
@@ -262,10 +274,16 @@ Eigen::Matrix<double, Eigen::Dynamic, 1> Solver::getGradient()
     return m_pimpl->solver->getGradient();
 }
 
+[[deprecated("Use setInequalityConstraintsMatrix() instead.")]]
 bool
-Solver::setLinearConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix)
+Solver::setLinearConstraintsMatrix(const Eigen::SparseMatrix<double>& inequalityConstraintsMatrix)
 {
-    return m_pimpl->solver->setLinearConstraintsMatrix(linearConstraintsMatrix);
+    return m_pimpl->solver->setInequalityConstraintsMatrix(inequalityConstraintsMatrix);
+}
+
+bool Solver::setInequalityConstraintsMatrix(const Eigen::SparseMatrix<double>& inequalityConstraintsMatrix)
+{
+    return m_pimpl->solver->setInequalityConstraintsMatrix(inequalityConstraintsMatrix);
 }
 
 bool Solver::setLowerBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBoundVector)

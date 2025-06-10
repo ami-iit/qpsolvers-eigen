@@ -59,7 +59,7 @@ bool NullSolver::updateHessianMatrix(const Eigen::SparseMatrix<double> &hessianM
     return false;
 }
 
-bool NullSolver::updateLinearConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix)
+bool NullSolver::updateInequalityConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix)
 {
     return false;
 }
@@ -110,7 +110,7 @@ void NullSolver::setNumberOfVariables(int n)
     return;
 }
 
-void NullSolver::setNumberOfConstraints(int m)
+void NullSolver::setNumberOfInequalityConstraints(int m)
 {
     return;
 }
@@ -136,7 +136,7 @@ Eigen::Matrix<double, Eigen::Dynamic, 1> NullSolver::getGradient()
 }
 
 bool
-NullSolver::setLinearConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix)
+NullSolver::setInequalityConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix)
 {
     return false;
 }
