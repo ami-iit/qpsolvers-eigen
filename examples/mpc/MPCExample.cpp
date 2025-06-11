@@ -95,12 +95,12 @@ void castMPCToQPGradient(const Eigen::DiagonalMatrix<double, 12>& Q,
     }
 }
 
-void castMPCToQPConstraintMatrix(const Eigen::Matrix<double, 12, 12>& dynamicMatrix,
+void castMPCToQPLinearConstraintMatrix(const Eigen::Matrix<double, 12, 12>& dynamicMatrix,
                                  const Eigen::Matrix<double, 12, 4>& controlMatrix,
                                  int mpcWindow,
                                  Eigen::SparseMatrix<double>& constraintMatrix)
 {
-    constraintMatrix.resize(12 * (mpcWindow + 1) + 12 * (mpcWindow + 1) + 4 * mpcWindow,
+    constraintMatrix.resize( 12 * (mpcWindow + 1),
                             12 * (mpcWindow + 1) + 4 * mpcWindow);
 
     // populate linear constraint matrix
@@ -131,10 +131,17 @@ void castMPCToQPConstraintMatrix(const Eigen::Matrix<double, 12, 12>& dynamicMat
                         = value;
                 }
             }
+}
 
+void castMPCToQPInequalityConstraintMatrix(int mpcWindow, Eigen::SparseMatrix<double>& constraintMatrix)
+{
+    constraintMatrix.resize(12 * (mpcWindow + 1) + 4 * mpcWindow,
+                            12 * (mpcWindow + 1) + 4 * mpcWindow);
+
+    // populate linear constraint matrix
     for (int i = 0; i < 12 * (mpcWindow + 1) + 4 * mpcWindow; i++)
     {
-        constraintMatrix.insert(i + (mpcWindow + 1) * 12, i) = 1;
+        constraintMatrix.insert(i, i) = 1;
     }
 }
 
@@ -144,13 +151,14 @@ void castMPCToQPConstraintVectors(const Eigen::Matrix<double, 12, 1>& xMax,
                                   const Eigen::Matrix<double, 4, 1>& uMin,
                                   const Eigen::Matrix<double, 12, 1>& x0,
                                   int mpcWindow,
-                                  Eigen::VectorXd& lowerBound,
-                                  Eigen::VectorXd& upperBound)
+                                  Eigen::VectorXd& equalityVectorConstraints,
+                                  Eigen::VectorXd& lowerInequality,
+                                  Eigen::VectorXd& upperInequality)
 {
     // evaluate the lower and the upper inequality vectors
-    Eigen::VectorXd lowerInequality
+    lowerInequality
         = Eigen::MatrixXd::Zero(12 * (mpcWindow + 1) + 4 * mpcWindow, 1);
-    Eigen::VectorXd upperInequality
+    upperInequality
         = Eigen::MatrixXd::Zero(12 * (mpcWindow + 1) + 4 * mpcWindow, 1);
     for (int i = 0; i < mpcWindow + 1; i++)
     {
@@ -164,26 +172,14 @@ void castMPCToQPConstraintVectors(const Eigen::Matrix<double, 12, 1>& xMax,
     }
 
     // evaluate the lower and the upper equality vectors
-    Eigen::VectorXd lowerEquality = Eigen::MatrixXd::Zero(12 * (mpcWindow + 1), 1);
-    Eigen::VectorXd upperEquality;
-    lowerEquality.block(0, 0, 12, 1) = -x0;
-    upperEquality = lowerEquality;
-    lowerEquality = lowerEquality;
-
-    // merge inequality and equality vectors
-    lowerBound = Eigen::MatrixXd::Zero(2 * 12 * (mpcWindow + 1) + 4 * mpcWindow, 1);
-    lowerBound << lowerEquality, lowerInequality;
-
-    upperBound = Eigen::MatrixXd::Zero(2 * 12 * (mpcWindow + 1) + 4 * mpcWindow, 1);
-    upperBound << upperEquality, upperInequality;
+    equalityVectorConstraints = Eigen::MatrixXd::Zero(12 * (mpcWindow + 1), 1);
+    equalityVectorConstraints.block(0, 0, 12, 1) = -x0;
 }
 
-void updateConstraintVectors(const Eigen::Matrix<double, 12, 1>& x0,
-                             Eigen::VectorXd& lowerBound,
-                             Eigen::VectorXd& upperBound)
+void updateLinearConstraintVectors(const Eigen::Matrix<double, 12, 1>& x0,
+                             Eigen::VectorXd& equalityVectorConstraints)
 {
-    lowerBound.block(0, 0, 12, 1) = -x0;
-    upperBound.block(0, 0, 12, 1) = -x0;
+    equalityVectorConstraints.block(0, 0, 12, 1) = -x0;
 }
 
 double getErrorNorm(const Eigen::Matrix<double, 12, 1>& x, const Eigen::Matrix<double, 12, 1>& xRef)
@@ -221,7 +217,9 @@ int main()
     // allocate QP problem matrices and vectors
     Eigen::SparseMatrix<double> hessian;
     Eigen::VectorXd gradient;
-    Eigen::SparseMatrix<double> linearMatrix;
+    Eigen::SparseMatrix<double> linearEqMatrix;
+    Eigen::SparseMatrix<double> linearInqeMatrix;
+    Eigen::VectorXd equalityVectorConstraints;
     Eigen::VectorXd lowerBound;
     Eigen::VectorXd upperBound;
 
@@ -237,12 +235,13 @@ int main()
     // cast the MPC problem as QP problem
     castMPCToQPHessian(Q, R, mpcWindow, hessian);
     castMPCToQPGradient(Q, xRef, mpcWindow, gradient);
-    castMPCToQPConstraintMatrix(a, b, mpcWindow, linearMatrix);
-    castMPCToQPConstraintVectors(xMax, xMin, uMax, uMin, x0, mpcWindow, lowerBound, upperBound);
+    castMPCToQPLinearConstraintMatrix(a, b, mpcWindow, linearEqMatrix);
+    castMPCToQPInequalityConstraintMatrix(mpcWindow, linearInqeMatrix);
+    castMPCToQPConstraintVectors(xMax, xMin, uMax, uMin, x0, mpcWindow, equalityVectorConstraints, lowerBound, upperBound);
 
     // instantiate the solver
     QpSolversEigen::Solver solver;
-    bool ok = solver.instantiateSolver("osqp");
+    bool ok = solver.instantiateSolver("proxqp");
     if (!ok)
     {
         std::cerr << "QpSolverEigenMPCExample: Failed to instantiate the solver." << std::endl;
@@ -262,17 +261,25 @@ int main()
     // Set proxqp-specific parameters
     if (solver.getSolverName() == "proxqp")
     {
+        solver.setBooleanParameter("verbose", true);
+        solver.setBooleanParameter("compute_timings", true);
         solver.setStringParameter("initial_guess", "WARM_START_WITH_PREVIOUS_RESULT");
     }
 
     // set the initial data of the QP solver
     solver.setNumberOfVariables(12 * (mpcWindow + 1) + 4 * mpcWindow);
-    solver.setNumberOfInequalityConstraints(2 * 12 * (mpcWindow + 1) + 4 * mpcWindow);
+    solver.setNumberOfInequalityConstraints(linearInqeMatrix.rows());
+    solver.setNumberOfEqualityConstraints(linearEqMatrix.rows());
+
     if (!solver.setHessianMatrix(hessian))
         return 1;
     if (!solver.setGradient(gradient))
         return 1;
-    if (!solver.setInequalityConstraintsMatrix(linearMatrix))
+    if (!solver.setInequalityConstraintsMatrix(linearInqeMatrix))
+        return 1;
+    if (!solver.setEqualityConstraintsMatrix(linearEqMatrix))
+        return 1;
+    if (!solver.setEqualityConstraintsVector(equalityVectorConstraints))
         return 1;
     if (!solver.setLowerBound(lowerBound))
         return 1;
@@ -308,8 +315,8 @@ int main()
         x0 = a * x0 + b * ctr;
 
         // update the constraint bound
-        updateConstraintVectors(x0, lowerBound, upperBound);
-        if (!solver.updateBounds(lowerBound, upperBound))
+        updateLinearConstraintVectors(x0, equalityVectorConstraints);
+        if (!solver.updateEqualityConstraintsVector(equalityVectorConstraints))
             return 1;
     }
     return 0;
