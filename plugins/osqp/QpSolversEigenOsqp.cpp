@@ -30,6 +30,14 @@ private:
     // Buffers used to store the bound data with infinity values compatible with OsqpEigen
     Eigen::VectorXd lowerBoundBufferWithOsqpEigenInfty;
     Eigen::VectorXd upperBoundBufferWithOsqpEigenInfty;
+    int numberOfEqualityConstraints = 0;
+    int numberOfInequalityConstraints = 0;
+    int numberOfVariables = 0;
+    Eigen::SparseMatrix<double> totalConstraintsMatrix;
+    Eigen::VectorXd totalLowerConstraintsVector;
+    Eigen::VectorXd totalUpperConstraintsVector;
+    bool updateConstraintMatrix = false;
+    bool updateConstraintVectors = false;
 
 public:
     virtual ~OsqpSolver() = default;
@@ -45,28 +53,33 @@ public:
     const Eigen::Matrix<double, Eigen::Dynamic, 1>& getSolution() override;
     const Eigen::Matrix<double, Eigen::Dynamic, 1>& getDualSolution() override;
     bool updateHessianMatrix(const Eigen::SparseMatrix<double> &hessianMatrix) override;
-    bool updateLinearConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix) override;
+    bool updateInequalityConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix) override;
     bool updateGradient(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& gradient) override;
     bool updateLowerBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound) override;
     bool updateUpperBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound) override;
     bool updateBounds(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound,
                  const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound) override;
+    bool updateEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix) override;
+    bool updateEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector) override;
 
     void clearHessianMatrix() override;
     void clearLinearConstraintsMatrix() override;
     void setNumberOfVariables(int n) override;
-    void setNumberOfConstraints(int m) override;
+    void setNumberOfInequalityConstraints(int m) override;
+    void setNumberOfEqualityConstraints(int m) override;
     bool setHessianMatrix(const Eigen::SparseMatrix<double>& hessianMatrix) override;
     bool setGradient(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> gradientVector) override;
 
     Eigen::Matrix<double, Eigen::Dynamic, 1> getGradient() override;
 
     bool
-    setLinearConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix) override;
+    setInequalityConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix) override;
     bool setLowerBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBoundVector) override;
     bool setUpperBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBoundVector) override;
     bool setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBound,
                    Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBound) override;
+    bool setEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix) override;
+    bool setEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector) override;
 
     bool setBooleanParameter(const std::string& settingName, bool value) override;
     bool setIntegerParameter(const std::string& settingName, int64_t value) override;
@@ -167,6 +180,7 @@ std::string OsqpSolver::getSolverName() const
 
 bool OsqpSolver::initSolver()
 {
+    osqpEigenSolver.data()->setLinearConstraintsMatrix(totalConstraintsMatrix);
     return osqpEigenSolver.initSolver();
 }
 
@@ -187,6 +201,24 @@ bool OsqpSolver::clearSolverVariables()
 
 QpSolversEigen::ErrorExitFlag OsqpSolver::solveProblem()
 {
+    if (updateConstraintMatrix)
+    {
+        if(!osqpEigenSolver.updateLinearConstraintsMatrix(totalConstraintsMatrix))
+        {
+            QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::solveProblem: Error setting linear constraints matrix." << std::endl;
+            return QpSolversEigen::ErrorExitFlag::DataValidationError;
+        }
+        updateConstraintMatrix = false;
+    }
+    if (updateConstraintVectors)
+    {
+        if(!osqpEigenSolver.updateBounds(totalLowerConstraintsVector, totalUpperConstraintsVector))
+        {
+            QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::solveProblem: Error setting bounds." << std::endl;
+            return QpSolversEigen::ErrorExitFlag::DataValidationError;
+        }
+        updateConstraintVectors = false;
+    }
     return this->convertErrorExitFlag(osqpEigenSolver.solveProblem());
 }
 
@@ -215,9 +247,20 @@ bool OsqpSolver::updateHessianMatrix(const Eigen::SparseMatrix<double> &hessianM
     return osqpEigenSolver.updateHessianMatrix(hessianMatrix);
 }
 
-bool OsqpSolver::updateLinearConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix)
+bool OsqpSolver::updateInequalityConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix)
 {
-    return osqpEigenSolver.updateLinearConstraintsMatrix(linearConstraintsMatrix);
+    if (linearConstraintsMatrix.rows() != numberOfInequalityConstraints)
+    {
+        QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::updateLinearConstraintsMatrix: number of rows in linear constraints matrix does not match the number of inequality constraints." << std::endl;
+        return false;
+    }
+    for (int k=0; k < linearConstraintsMatrix.outerSize(); ++k) {
+        for (Eigen::SparseMatrix<double>::InnerIterator it(linearConstraintsMatrix,k); it; ++it) {
+            totalConstraintsMatrix.coeffRef(it.row(), it.col()) = it.value();
+        }
+    }
+    updateConstraintMatrix = true;
+    return true;
 }
 
 bool OsqpSolver::updateGradient(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& gradient)
@@ -227,22 +270,70 @@ bool OsqpSolver::updateGradient(const Eigen::Ref<const Eigen::Matrix<double, Eig
 
 bool OsqpSolver::updateLowerBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound)
 {
+    if (lowerBound.size() != numberOfInequalityConstraints)
+    {
+        QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::updateLowerBound: size of lower bound vector does not match the number of inequality constraints." << std::endl;
+        return false;
+    }
     bool ok = convertQpSolversEigenInftyToOsqpEigenInfty(lowerBound, lowerBoundBufferWithOsqpEigenInfty);
-    return ok && osqpEigenSolver.updateLowerBound(lowerBoundBufferWithOsqpEigenInfty);
+    totalLowerConstraintsVector.head(numberOfInequalityConstraints) = lowerBoundBufferWithOsqpEigenInfty;
+    updateConstraintVectors = true;
+    return true;
 }
 
 bool OsqpSolver::updateUpperBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound)
 {
     bool ok = convertQpSolversEigenInftyToOsqpEigenInfty(upperBound, upperBoundBufferWithOsqpEigenInfty);
-    return ok && osqpEigenSolver.updateUpperBound(upperBoundBufferWithOsqpEigenInfty);
+    totalUpperConstraintsVector.head(numberOfInequalityConstraints) = upperBoundBufferWithOsqpEigenInfty;
+    updateConstraintVectors = true;
+    return true;
 }
 
 bool OsqpSolver::updateBounds(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound,
              const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound)
 {
+    if (lowerBound.size() != numberOfInequalityConstraints || upperBound.size() != numberOfInequalityConstraints)
+    {
+        QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::updateBounds: size of lower or upper bound vector does not match the number of inequality constraints." << std::endl;
+        return false;
+    }
     bool ok = convertQpSolversEigenInftyToOsqpEigenInfty(lowerBound, lowerBoundBufferWithOsqpEigenInfty);
     ok = ok &&  convertQpSolversEigenInftyToOsqpEigenInfty(upperBound, upperBoundBufferWithOsqpEigenInfty);
-    return osqpEigenSolver.updateBounds(lowerBoundBufferWithOsqpEigenInfty, upperBoundBufferWithOsqpEigenInfty);
+    totalLowerConstraintsVector.head(numberOfInequalityConstraints) = lowerBoundBufferWithOsqpEigenInfty;
+    totalUpperConstraintsVector.head(numberOfInequalityConstraints) = upperBoundBufferWithOsqpEigenInfty;
+    updateConstraintVectors = true;
+    return true;
+}
+
+bool OsqpSolver::updateEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix)
+{
+    if (equalityConstraintsMatrix.rows() != numberOfEqualityConstraints)
+    {
+        QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::updateEqualityConstraintsMatrix: number of rows in equality constraints matrix does not match the number of equality constraints." << std::endl;
+        return false;
+    }
+    const int startRow = numberOfInequalityConstraints;
+    for (int k=0; k < equalityConstraintsMatrix.outerSize(); ++k) {
+        for (Eigen::SparseMatrix<double>::InnerIterator it(equalityConstraintsMatrix,k); it; ++it) {
+            totalConstraintsMatrix.coeffRef(it.row() + startRow, it.col()) = it.value();
+        }
+    }
+    updateConstraintMatrix = true;
+    return true;
+}
+
+bool OsqpSolver::updateEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector)
+{
+    if (equalityConstraintsVector.size() != numberOfEqualityConstraints)
+    {
+        QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::updateEqualityConstraintsVector: size of equality constraints vector does not match the number of equality constraints." << std::endl;
+        return false;
+    }
+    bool ok = convertQpSolversEigenInftyToOsqpEigenInfty(equalityConstraintsVector, lowerBoundBufferWithOsqpEigenInfty);
+    totalLowerConstraintsVector.tail(numberOfEqualityConstraints) = lowerBoundBufferWithOsqpEigenInfty;
+    totalUpperConstraintsVector.tail(numberOfEqualityConstraints) = lowerBoundBufferWithOsqpEigenInfty;
+    updateConstraintVectors = true;
+    return true;
 }
 
 void OsqpSolver::clearHessianMatrix()
@@ -257,12 +348,31 @@ void OsqpSolver::clearLinearConstraintsMatrix()
 
 void OsqpSolver::setNumberOfVariables(int n)
 {
+    numberOfVariables = n;
     return osqpEigenSolver.data()->setNumberOfVariables(n);
 }
 
-void OsqpSolver::setNumberOfConstraints(int m)
+void OsqpSolver::setNumberOfInequalityConstraints(int m)
 {
-    return osqpEigenSolver.data()->setNumberOfConstraints(m);
+    if (numberOfVariables == 0)
+    {
+        QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::setNumberOfConstraints: number of variables is not set, cannot set number of constraints." << std::endl;
+        return;
+    }
+    numberOfInequalityConstraints = m;
+    totalConstraintsMatrix.resize(numberOfInequalityConstraints + numberOfEqualityConstraints, numberOfVariables);
+    totalLowerConstraintsVector.resize(numberOfInequalityConstraints + numberOfEqualityConstraints);
+    totalUpperConstraintsVector.resize(numberOfInequalityConstraints + numberOfEqualityConstraints);
+    return osqpEigenSolver.data()->setNumberOfConstraints(numberOfInequalityConstraints + numberOfEqualityConstraints);
+}
+
+void OsqpSolver::setNumberOfEqualityConstraints(int m)
+{
+    numberOfEqualityConstraints = m;
+    totalConstraintsMatrix.resize(numberOfInequalityConstraints + numberOfEqualityConstraints, numberOfVariables);
+    totalLowerConstraintsVector.resize(numberOfInequalityConstraints + numberOfEqualityConstraints);
+    totalUpperConstraintsVector.resize(numberOfInequalityConstraints + numberOfEqualityConstraints);
+    return osqpEigenSolver.data()->setNumberOfConstraints(numberOfInequalityConstraints + numberOfEqualityConstraints);
 }
 
 bool OsqpSolver::setHessianMatrix(const Eigen::SparseMatrix<double>& hessianMatrix)
@@ -281,21 +391,43 @@ Eigen::Matrix<double, Eigen::Dynamic, 1> OsqpSolver::getGradient()
 }
 
 bool
-OsqpSolver::setLinearConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix)
+OsqpSolver::setInequalityConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix)
 {
-    return osqpEigenSolver.data()->setLinearConstraintsMatrix(linearConstraintsMatrix);
+    if (linearConstraintsMatrix.rows() != numberOfInequalityConstraints)
+    {
+        QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::setLinearConstraintsMatrix: number of rows in linear constraints matrix does not match the number of inequality constraints." << std::endl;
+        return false;
+    }
+    for (int k=0; k < linearConstraintsMatrix.outerSize(); ++k) {
+        for (Eigen::SparseMatrix<double>::InnerIterator it(linearConstraintsMatrix,k); it; ++it) {
+            totalConstraintsMatrix.coeffRef(it.row(), it.col()) = it.value();
+        }
+    }
+    return true;
 }
 
 bool OsqpSolver::setLowerBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBoundVector)
 {
+    if (lowerBoundVector.size() != numberOfInequalityConstraints)
+    {
+        QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::setLowerBound: size of lower bound vector does not match the number of inequality constraints." << std::endl;
+        return false;
+    }
     bool ok = convertQpSolversEigenInftyToOsqpEigenInfty(lowerBoundVector, lowerBoundBufferWithOsqpEigenInfty);
-    return osqpEigenSolver.data()->setLowerBound(lowerBoundBufferWithOsqpEigenInfty);
+    totalLowerConstraintsVector.head(numberOfInequalityConstraints) = lowerBoundBufferWithOsqpEigenInfty;
+    return osqpEigenSolver.data()->setLowerBound(totalLowerConstraintsVector);
 }
 
 bool OsqpSolver::setUpperBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBoundVector)
 {
+    if (upperBoundVector.size() != numberOfInequalityConstraints)
+    {
+        QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::setUpperBound: size of upper bound vector does not match the number of inequality constraints." << std::endl;
+        return false;
+    }
     bool ok = convertQpSolversEigenInftyToOsqpEigenInfty(upperBoundVector, upperBoundBufferWithOsqpEigenInfty);
-    return osqpEigenSolver.data()->setUpperBound(upperBoundBufferWithOsqpEigenInfty);
+    totalUpperConstraintsVector.head(numberOfInequalityConstraints) = upperBoundBufferWithOsqpEigenInfty;
+    return osqpEigenSolver.data()->setUpperBound(totalUpperConstraintsVector);
 }
 
 bool OsqpSolver::setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBound,
@@ -304,6 +436,34 @@ bool OsqpSolver::setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> 
     bool ok = convertQpSolversEigenInftyToOsqpEigenInfty(lowerBound, lowerBoundBufferWithOsqpEigenInfty);
     ok = ok &&  convertQpSolversEigenInftyToOsqpEigenInfty(upperBound, upperBoundBufferWithOsqpEigenInfty);
     return osqpEigenSolver.data()->setBounds(lowerBoundBufferWithOsqpEigenInfty, upperBoundBufferWithOsqpEigenInfty);
+}
+
+bool OsqpSolver::setEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix)
+{
+    if (equalityConstraintsMatrix.rows() != numberOfEqualityConstraints)
+    {
+        QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::setEqualityConstraintsMatrix: number of rows in equality constraints matrix does not match the number of equality constraints." << std::endl;
+        return false;
+    }
+    const int startRow = numberOfInequalityConstraints;
+    for (int k=0; k < equalityConstraintsMatrix.outerSize(); ++k) {
+        for (Eigen::SparseMatrix<double>::InnerIterator it(equalityConstraintsMatrix,k); it; ++it) {
+            totalConstraintsMatrix.coeffRef(it.row() + startRow, it.col()) = it.value();
+        }
+    }
+    return true;
+}
+
+bool OsqpSolver::setEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector)
+{
+    if (equalityConstraintsVector.size() != numberOfEqualityConstraints)
+    {
+        QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::setEqualityConstraintsVector: size of equality constraints vector does not match the number of equality constraints." << std::endl;
+        return false;
+    }
+    totalLowerConstraintsVector.tail(numberOfEqualityConstraints) = equalityConstraintsVector;
+    totalUpperConstraintsVector.tail(numberOfEqualityConstraints) = equalityConstraintsVector;
+    return osqpEigenSolver.data()->setBounds(totalLowerConstraintsVector, totalUpperConstraintsVector);
 }
 
 bool OsqpSolver::setBooleanParameter(const std::string& settingName, bool value)

@@ -53,7 +53,7 @@ TEST_CASE("QPProblem - Unconstrained")
     }
 
     solver.setNumberOfVariables(2);
-    solver.setNumberOfConstraints(0);
+    solver.setNumberOfInequalityConstraints(0);
 
     REQUIRE(solver.data()->setHessianMatrix(H_s));
     REQUIRE(solver.data()->setGradient(gradient));
@@ -108,10 +108,10 @@ TEST_CASE("QPProblem")
 
     solver.data()->setNumberOfVariables(2);
 
-    solver.data()->setNumberOfConstraints(3);
+    solver.data()->setNumberOfInequalityConstraints(3);
     REQUIRE(solver.data()->setHessianMatrix(H_s));
     REQUIRE(solver.data()->setGradient(gradient));
-    REQUIRE(solver.data()->setLinearConstraintsMatrix(A_s));
+    REQUIRE(solver.data()->setInequalityConstraintsMatrix(A_s));
     REQUIRE(solver.data()->setLowerBound(lowerBound));
     REQUIRE(solver.data()->setUpperBound(upperBound));
 
