@@ -182,7 +182,6 @@ bool Solver::updateHessianMatrix(const Eigen::SparseMatrix<double> &hessianMatri
     return m_pimpl->solver->updateHessianMatrix(hessianMatrix);
 }
 
-[[deprecated("Use updateInequalityConstraintsMatrix() instead.")]]
 bool Solver::updateLinearConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix)
 {
     return m_pimpl->solver->updateInequalityConstraintsMatrix(linearConstraintsMatrix);
@@ -243,7 +242,6 @@ void Solver::setNumberOfVariables(int n)
     return m_pimpl->solver->setNumberOfVariables(n);
 }
 
-[[deprecated("Use setNumberOfInequalityConstraints() instead.")]]
 void Solver::setNumberOfConstraints(int m)
 {
     return m_pimpl->solver->setNumberOfInequalityConstraints(m);
@@ -274,7 +272,6 @@ Eigen::Matrix<double, Eigen::Dynamic, 1> Solver::getGradient()
     return m_pimpl->solver->getGradient();
 }
 
-[[deprecated("Use setInequalityConstraintsMatrix() instead.")]]
 bool
 Solver::setLinearConstraintsMatrix(const Eigen::SparseMatrix<double>& inequalityConstraintsMatrix)
 {

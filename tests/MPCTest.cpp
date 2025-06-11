@@ -297,10 +297,10 @@ TEST_CASE("MPCTest")
 
     // set the initial data of the QP solver
     solver.data()->setNumberOfVariables(12 * (mpcWindow + 1) + 4 * mpcWindow);
-    solver.data()->setNumberOfConstraints(2 * 12 * (mpcWindow + 1) + 4 * mpcWindow);
+    solver.data()->setNumberOfInequalityConstraints(2 * 12 * (mpcWindow + 1) + 4 * mpcWindow);
     REQUIRE(solver.data()->setHessianMatrix(hessian));
     REQUIRE(solver.data()->setGradient(gradient));
-    REQUIRE(solver.data()->setLinearConstraintsMatrix(linearMatrix));
+    REQUIRE(solver.data()->setInequalityConstraintsMatrix(linearMatrix));
     REQUIRE(solver.data()->setLowerBound(lowerBound));
     REQUIRE(solver.data()->setUpperBound(upperBound));
 

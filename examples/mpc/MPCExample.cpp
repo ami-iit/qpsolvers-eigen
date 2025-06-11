@@ -267,12 +267,12 @@ int main()
 
     // set the initial data of the QP solver
     solver.setNumberOfVariables(12 * (mpcWindow + 1) + 4 * mpcWindow);
-    solver.setNumberOfConstraints(2 * 12 * (mpcWindow + 1) + 4 * mpcWindow);
+    solver.setNumberOfInequalityConstraints(2 * 12 * (mpcWindow + 1) + 4 * mpcWindow);
     if (!solver.setHessianMatrix(hessian))
         return 1;
     if (!solver.setGradient(gradient))
         return 1;
-    if (!solver.setLinearConstraintsMatrix(linearMatrix))
+    if (!solver.setInequalityConstraintsMatrix(linearMatrix))
         return 1;
     if (!solver.setLowerBound(lowerBound))
         return 1;

@@ -60,10 +60,10 @@ TEST_CASE("QPProblem - UpdateMatricesTest")
         solver.setIntegerParameter("scaling", 0);
     }
     solver.setNumberOfVariables(2);
-    solver.setNumberOfConstraints(3);
+    solver.setNumberOfInequalityConstraints(3);
     REQUIRE(solver.setHessianMatrix(H_s));
     REQUIRE(solver.setGradient(gradient));
-    REQUIRE(solver.setLinearConstraintsMatrix(A_s));
+    REQUIRE(solver.setInequalityConstraintsMatrix(A_s));
     REQUIRE(solver.setLowerBound(lowerBound));
     REQUIRE(solver.setUpperBound(upperBound));
 
@@ -81,7 +81,7 @@ TEST_CASE("QPProblem - UpdateMatricesTest")
     A_s = A.sparseView();
 
     REQUIRE(solver.updateHessianMatrix(H_s));
-    REQUIRE(solver.updateLinearConstraintsMatrix(A_s));
+    REQUIRE(solver.updateInequalityConstraintsMatrix(A_s));
     REQUIRE(solver.solveProblem() == QpSolversEigen::ErrorExitFlag::NoError);
 
     solution = solver.getSolution();
@@ -95,7 +95,7 @@ TEST_CASE("QPProblem - UpdateMatricesTest")
     A_s = A.sparseView();
 
     REQUIRE(solver.updateHessianMatrix(H_s));
-    REQUIRE(solver.updateLinearConstraintsMatrix(A_s));
+    REQUIRE(solver.updateInequalityConstraintsMatrix(A_s));
     REQUIRE(solver.solveProblem() == QpSolversEigen::ErrorExitFlag::NoError);
 
     solution = solver.getSolution();
