@@ -32,9 +32,12 @@ TEST_CASE("QPProblem - UpdateMatricesTest")
     Eigen::SparseMatrix<double> H_s;
     Eigen::Matrix<double, 3, 2> A;
     Eigen::SparseMatrix<double> A_s;
+    Eigen::Matrix<double, 3, 2> C;
+    Eigen::SparseMatrix<double> C_s;
     Eigen::Matrix<double, 2, 1> gradient;
     Eigen::Matrix<double, 3, 1> lowerBound;
     Eigen::Matrix<double, 3, 1> upperBound;
+    Eigen::Matrix<double, 3, 1> equalityConstraintVector;
 
     std::string solverName = QPSOLVERSEIGEN_SOLVERS_TO_TEST;
     QpSolversEigen::Solver solver;
@@ -45,13 +48,18 @@ TEST_CASE("QPProblem - UpdateMatricesTest")
     H_s = H.sparseView();
     H_s.pruned(0.01);
 
-    // linear constraint matrix
+    // inequality constraint matrix
     A << 1, 1, 1, 0, 0, 1;
     A_s = A.sparseView();
+
+    // equality constraint matrix
+    C << 1, 1, 1, 0.5, 0, 1;
+    C_s = C.sparseView();
 
     gradient << 1, 1;
     lowerBound << 1, 0, 0;
     upperBound << 1, 0.7, 0.7;
+    equalityConstraintVector << 1, 0.5, 0;
 
     // Set osqp-specific parameters
     if (solver.getSolverName() == "osqp")
@@ -61,11 +69,14 @@ TEST_CASE("QPProblem - UpdateMatricesTest")
     }
     solver.setNumberOfVariables(2);
     solver.setNumberOfInequalityConstraints(3);
+    solver.setNumberOfEqualityConstraints(3);
     REQUIRE(solver.setHessianMatrix(H_s));
     REQUIRE(solver.setGradient(gradient));
     REQUIRE(solver.setInequalityConstraintsMatrix(A_s));
     REQUIRE(solver.setLowerBound(lowerBound));
     REQUIRE(solver.setUpperBound(upperBound));
+    REQUIRE(solver.setEqualityConstraintsMatrix(C_s));
+    REQUIRE(solver.setEqualityConstraintsVector(equalityConstraintVector));
 
     REQUIRE(solver.initSolver());
     REQUIRE(solver.solveProblem() == QpSolversEigen::ErrorExitFlag::NoError);
@@ -79,9 +90,12 @@ TEST_CASE("QPProblem - UpdateMatricesTest")
     H_s = H.sparseView();
     A << 2, 1, 1, 0, 0, 1;
     A_s = A.sparseView();
+    C << 2, 0, 2, 0.5, 0, 1;
+    C_s = C.sparseView();
 
     REQUIRE(solver.updateHessianMatrix(H_s));
     REQUIRE(solver.updateInequalityConstraintsMatrix(A_s));
+    REQUIRE(solver.updateEqualityConstraintsMatrix(C_s));
     REQUIRE(solver.solveProblem() == QpSolversEigen::ErrorExitFlag::NoError);
 
     solution = solver.getSolution();
@@ -93,9 +107,11 @@ TEST_CASE("QPProblem - UpdateMatricesTest")
     H_s = H.sparseView();
     A << 1, 1, 1, 0.4, 0, 1;
     A_s = A.sparseView();
+    C << 1, 1, 0.1, 0.5, 0, 0.1;
 
     REQUIRE(solver.updateHessianMatrix(H_s));
     REQUIRE(solver.updateInequalityConstraintsMatrix(A_s));
+    REQUIRE(solver.updateEqualityConstraintsMatrix(C_s));
     REQUIRE(solver.solveProblem() == QpSolversEigen::ErrorExitFlag::NoError);
 
     solution = solver.getSolution();
