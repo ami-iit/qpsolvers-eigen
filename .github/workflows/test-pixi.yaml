@@ -45,7 +45,7 @@ jobs:
         sudo apt-get install libc6-dbg
 
     - name: Set up pixi
-      uses: prefix-dev/setup-pixi@v0.8.1
+      uses: prefix-dev/setup-pixi@v0.8.8
 
     - name: Print pixi info
       run: pixi info
