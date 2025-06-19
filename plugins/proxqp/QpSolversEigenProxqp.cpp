@@ -1,6 +1,6 @@
-// QpSolversEigen 
-#include <QpSolversEigen/SolverInterface.hpp>
+// QpSolversEigen
 #include <QpSolversEigen/Debug.hpp>
+#include <QpSolversEigen/SolverInterface.hpp>
 
 // Class factory API
 #include <sharedlibpp/SharedLibraryClassApi.h>
@@ -13,7 +13,7 @@
 namespace QpSolversEigen
 {
 
-class ProxqpSolver final: public SolverInterface
+class ProxqpSolver final : public SolverInterface
 {
 private:
     // proxqp settings
@@ -21,7 +21,8 @@ private:
     // proxqp sparse solver
     std::unique_ptr<proxsuite::proxqp::sparse::QP<double, long long>> proxqpSparseSolver;
 
-    struct InitialSparseSolverData {
+    struct InitialSparseSolverData
+    {
         int numberOfVariables = 0;
         int numberOfInequalityConstraints = 0;
         int numberOfEqualityConstraints = 0;
@@ -48,16 +49,15 @@ private:
         bool isUpperBoundSet = false;
         Eigen::VectorXd u;
 
-
         bool isSet()
         {
             return isHessianSet && isGradientSet &&
-                   // If the problem is unconstrained there is no need to set the constraint-related variables
-                   ((isLinearConstraintsSet && isLowerBoundSet && isUpperBoundSet) || (numberOfInequalityConstraints + numberOfEqualityConstraints == 0));
+                   // If the problem is unconstrained there is no need to set the constraint-related
+                   // variables
+                   ((isLinearConstraintsSet && isLowerBoundSet && isUpperBoundSet)
+                    || (numberOfInequalityConstraints + numberOfEqualityConstraints == 0));
         }
     } initialSparseSolverData;
-
-
 
     // If proxqpSparseSolver is set, copy proxqpSettings to the proxqpSparseSolver->settings
     void syncSettings();
@@ -81,15 +81,23 @@ public:
     const double getObjValue() const override;
     const Eigen::Matrix<double, Eigen::Dynamic, 1>& getSolution() override;
     const Eigen::Matrix<double, Eigen::Dynamic, 1>& getDualSolution() override;
-    bool updateHessianMatrix(const Eigen::SparseMatrix<double> &hessianMatrix) override;
-    bool updateInequalityConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix) override;
-    bool updateGradient(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& gradient) override;
-    bool updateLowerBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound) override;
-    bool updateUpperBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound) override;
-    bool updateBounds(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound,
-                 const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound) override;
-    bool updateEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix) override;
-    bool updateEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector) override;
+    bool updateHessianMatrix(const Eigen::SparseMatrix<double>& hessianMatrix) override;
+    bool updateInequalityConstraintsMatrix(
+        const Eigen::SparseMatrix<double>& linearConstraintsMatrix) override;
+    bool updateGradient(
+        const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& gradient) override;
+    bool updateLowerBound(
+        const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound) override;
+    bool updateUpperBound(
+        const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound) override;
+    bool updateBounds(
+        const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound,
+        const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound) override;
+    bool updateEqualityConstraintsMatrix(
+        const Eigen::SparseMatrix<double>& equalityConstraintsMatrix) override;
+    bool updateEqualityConstraintsVector(
+        const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector)
+        override;
     void clearHessianMatrix() override;
     void clearLinearConstraintsMatrix() override;
 
@@ -98,14 +106,19 @@ public:
 
     Eigen::Matrix<double, Eigen::Dynamic, 1> getGradient() override;
 
+    bool setInequalityConstraintsMatrix(
+        const Eigen::SparseMatrix<double>& linearConstraintsMatrix) override;
     bool
-    setInequalityConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix) override;
-    bool setLowerBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBoundVector) override;
-    bool setUpperBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBoundVector) override;
+    setLowerBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBoundVector) override;
+    bool
+    setUpperBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBoundVector) override;
     bool setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBound,
                    Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBound) override;
-    bool setEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix) override;
-    bool setEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector) override;
+    bool setEqualityConstraintsMatrix(
+        const Eigen::SparseMatrix<double>& equalityConstraintsMatrix) override;
+    bool
+    setEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>&
+                                     equalityConstraintsVector) override;
 
     bool setBooleanParameter(const std::string& settingName, bool value) override;
     bool setIntegerParameter(const std::string& settingName, int64_t value) override;
@@ -122,9 +135,12 @@ public:
 
 // The first argument needs to be coherent with the scheme used in
 // getSharedlibppFactoryNameFromSolverName, i.e. qpsolvers_eigen_<solverName>
-SHLIBPP_DEFINE_SHARED_SUBCLASS(qpsolvers_eigen_proxqp, QpSolversEigen::ProxqpSolver, QpSolversEigen::SolverInterface);
+SHLIBPP_DEFINE_SHARED_SUBCLASS(qpsolvers_eigen_proxqp,
+                               QpSolversEigen::ProxqpSolver,
+                               QpSolversEigen::SolverInterface);
 
-QpSolversEigen::Status ProxqpSolver::convertStatus(const proxsuite::proxqp::QPSolverOutput status) const
+QpSolversEigen::Status
+ProxqpSolver::convertStatus(const proxsuite::proxqp::QPSolverOutput status) const
 {
     switch (status)
     {
@@ -177,15 +193,25 @@ bool ProxqpSolver::initSolver()
 {
     if (!initialSparseSolverData.isSet())
     {
-        debugStream() << "QpSolversEigen::ProxqpSolver::initSolver: Some data are not set." << std::endl;
+        debugStream() << "QpSolversEigen::ProxqpSolver::initSolver: Some data are not set."
+                      << std::endl;
         return false;
     }
 
-    proxqpSparseSolver = std::make_unique<proxsuite::proxqp::sparse::QP<double, long long>>(initialSparseSolverData.numberOfVariables, initialSparseSolverData.numberOfEqualityConstraints, initialSparseSolverData.numberOfInequalityConstraints);
+    proxqpSparseSolver = std::make_unique<
+        proxsuite::proxqp::sparse::QP<double, long long>>(initialSparseSolverData.numberOfVariables,
+                                                          initialSparseSolverData
+                                                              .numberOfEqualityConstraints,
+                                                          initialSparseSolverData
+                                                              .numberOfInequalityConstraints);
     syncSettings();
-    proxqpSparseSolver->init(initialSparseSolverData.H, initialSparseSolverData.g,
-                             initialSparseSolverData.A, initialSparseSolverData.b,
-                             initialSparseSolverData.C, initialSparseSolverData.l, initialSparseSolverData.u);
+    proxqpSparseSolver->init(initialSparseSolverData.H,
+                             initialSparseSolverData.g,
+                             initialSparseSolverData.A,
+                             initialSparseSolverData.b,
+                             initialSparseSolverData.C,
+                             initialSparseSolverData.l,
+                             initialSparseSolverData.u);
 
     return isInitialized();
 }
@@ -202,7 +228,9 @@ void ProxqpSolver::clearSolver()
 
 bool ProxqpSolver::clearSolverVariables()
 {
-    QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::clearSolverVariables: method not supported in proxqp." << std::endl;
+    QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::clearSolverVariables: method "
+                                     "not supported in proxqp."
+                                  << std::endl;
     return false;
 }
 
@@ -210,12 +238,12 @@ QpSolversEigen::ErrorExitFlag ProxqpSolver::solveProblem()
 {
     if (!proxqpSparseSolver)
     {
-        QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::solveProblem: solver not initialized." << std::endl;
+        QpSolversEigen::debugStream()
+            << "QpSolversEigen::ProxqpSolver::solveProblem: solver not initialized." << std::endl;
         return QpSolversEigen::ErrorExitFlag::WorkspaceNotInitError;
     }
 
     proxqpSparseSolver->solve();
-
 
     return QpSolversEigen::ErrorExitFlag::NoError;
 }
@@ -224,7 +252,8 @@ QpSolversEigen::Status ProxqpSolver::getStatus() const
 {
     if (!proxqpSparseSolver)
     {
-        QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::solveProblem: solver not initialized." << std::endl;
+        QpSolversEigen::debugStream()
+            << "QpSolversEigen::ProxqpSolver::solveProblem: solver not initialized." << std::endl;
         return QpSolversEigen::Status::SolverNotInitialized;
     }
 
@@ -246,88 +275,132 @@ const Eigen::Matrix<double, Eigen::Dynamic, 1>& ProxqpSolver::getDualSolution()
     return proxqpSparseSolver->results.z;
 }
 
-bool ProxqpSolver::updateHessianMatrix(const Eigen::SparseMatrix<double> &hessianMatrix)
+bool ProxqpSolver::updateHessianMatrix(const Eigen::SparseMatrix<double>& hessianMatrix)
 {
     if (!isInitialized())
     {
-        debugStream() << "QpSolversEigen::ProxqpSolver::updateHessianMatrix: solver was not initialized." << std::endl;
+        debugStream() << "QpSolversEigen::ProxqpSolver::updateHessianMatrix: solver was not "
+                         "initialized."
+                      << std::endl;
         return false;
     }
 
-    proxqpSparseSolver->update(initialSparseSolverData.H, proxsuite::nullopt,
-                               proxsuite::nullopt, proxsuite::nullopt,
-                               proxsuite::nullopt, proxsuite::nullopt, proxsuite::nullopt);
+    proxqpSparseSolver->update(initialSparseSolverData.H,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt);
 
     return true;
 }
 
-bool ProxqpSolver::updateInequalityConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix)
+bool ProxqpSolver::updateInequalityConstraintsMatrix(
+    const Eigen::SparseMatrix<double>& linearConstraintsMatrix)
 {
-    proxqpSparseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
-                               proxsuite::nullopt, proxsuite::nullopt,
-                               linearConstraintsMatrix, proxsuite::nullopt, proxsuite::nullopt);
+    proxqpSparseSolver->update(proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               linearConstraintsMatrix,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt);
     return true;
 }
 
-bool ProxqpSolver::updateGradient(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& gradient)
+bool ProxqpSolver::updateGradient(
+    const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& gradient)
 {
-    proxqpSparseSolver->update(proxsuite::nullopt, gradient,
-                               proxsuite::nullopt, proxsuite::nullopt,
-                               proxsuite::nullopt, proxsuite::nullopt, proxsuite::nullopt);
+    proxqpSparseSolver->update(proxsuite::nullopt,
+                               gradient,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt);
     return true;
 }
 
-bool ProxqpSolver::updateLowerBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound)
+bool ProxqpSolver::updateLowerBound(
+    const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound)
 {
-    proxqpSparseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
-                               proxsuite::nullopt, proxsuite::nullopt,
-                               proxsuite::nullopt, lowerBound, proxsuite::nullopt);
+    proxqpSparseSolver->update(proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               lowerBound,
+                               proxsuite::nullopt);
     return true;
 }
 
-bool ProxqpSolver::updateUpperBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound)
+bool ProxqpSolver::updateUpperBound(
+    const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound)
 {
-    proxqpSparseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
-                               proxsuite::nullopt, proxsuite::nullopt,
-                               proxsuite::nullopt, proxsuite::nullopt, upperBound);
+    proxqpSparseSolver->update(proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               upperBound);
     return true;
 }
 
-bool ProxqpSolver::updateBounds(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound,
-             const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound)
+bool ProxqpSolver::updateBounds(
+    const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound,
+    const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound)
 {
-    proxqpSparseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
-                               proxsuite::nullopt, proxsuite::nullopt,
-                               proxsuite::nullopt, lowerBound, upperBound);
+    proxqpSparseSolver->update(proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               lowerBound,
+                               upperBound);
     return true;
 }
 
-bool ProxqpSolver::updateEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix)
+bool ProxqpSolver::updateEqualityConstraintsMatrix(
+    const Eigen::SparseMatrix<double>& equalityConstraintsMatrix)
 {
-    proxqpSparseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
-                               equalityConstraintsMatrix, proxsuite::nullopt,
-                               proxsuite::nullopt, proxsuite::nullopt, proxsuite::nullopt);
+    proxqpSparseSolver->update(proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               equalityConstraintsMatrix,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt);
     return true;
 }
 
-bool ProxqpSolver::updateEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector)
+bool ProxqpSolver::updateEqualityConstraintsVector(
+    const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector)
 {
-    proxqpSparseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
-                               proxsuite::nullopt, equalityConstraintsVector,
-                               proxsuite::nullopt, proxsuite::nullopt, proxsuite::nullopt);
+    proxqpSparseSolver->update(proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               equalityConstraintsVector,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt,
+                               proxsuite::nullopt);
     return true;
 }
-
 
 void ProxqpSolver::clearHessianMatrix()
 {
-    QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::clearHessianMatrix: method unsupported in proxqp plugin" << std::endl;
+    QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::clearHessianMatrix: method "
+                                     "unsupported in proxqp plugin"
+                                  << std::endl;
     return;
 }
 
 void ProxqpSolver::clearLinearConstraintsMatrix()
 {
-    QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::clearLinearConstraintsMatrix: method unsupported in proxqp plugin" << std::endl;
+    QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::clearLinearConstraintsMatrix: "
+                                     "method unsupported in proxqp plugin"
+                                  << std::endl;
     return;
 }
 
@@ -350,22 +423,24 @@ Eigen::Matrix<double, Eigen::Dynamic, 1> ProxqpSolver::getGradient()
     return Eigen::Matrix<double, Eigen::Dynamic, 1>();
 }
 
-bool
-ProxqpSolver::setInequalityConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix)
+bool ProxqpSolver::setInequalityConstraintsMatrix(
+    const Eigen::SparseMatrix<double>& linearConstraintsMatrix)
 {
     initialSparseSolverData.C = linearConstraintsMatrix;
     initialSparseSolverData.isLinearConstraintsSet = true;
     return true;
 }
 
-bool ProxqpSolver::setLowerBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBoundVector)
+bool ProxqpSolver::setLowerBound(
+    Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBoundVector)
 {
     initialSparseSolverData.l = lowerBoundVector;
     initialSparseSolverData.isLowerBoundSet = true;
     return true;
 }
 
-bool ProxqpSolver::setUpperBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBoundVector)
+bool ProxqpSolver::setUpperBound(
+    Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBoundVector)
 {
     initialSparseSolverData.u = upperBoundVector;
     initialSparseSolverData.isUpperBoundSet = true;
@@ -373,20 +448,22 @@ bool ProxqpSolver::setUpperBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic
 }
 
 bool ProxqpSolver::setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBound,
-               Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBound)
+                             Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBound)
 {
     bool ok = setLowerBound(lowerBound) && setUpperBound(upperBound);
     return ok;
 }
 
-bool ProxqpSolver::setEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix)
+bool ProxqpSolver::setEqualityConstraintsMatrix(
+    const Eigen::SparseMatrix<double>& equalityConstraintsMatrix)
 {
     initialSparseSolverData.A = equalityConstraintsMatrix;
     initialSparseSolverData.isEqualityConstraintsMatrixSet = true;
     return true;
 }
 
-bool ProxqpSolver::setEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector)
+bool ProxqpSolver::setEqualityConstraintsVector(
+    const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector)
 {
     initialSparseSolverData.b = equalityConstraintsVector;
     initialSparseSolverData.isEqualityConstraintsVectorSet = true;
@@ -434,7 +511,9 @@ bool ProxqpSolver::setBooleanParameter(const std::string& settingName, bool valu
         return true;
     }
 
-    QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::setRealNumberParameter: unknown setting name: " << settingName << std::endl;
+    QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::setRealNumberParameter: "
+                                     "unknown setting name: "
+                                  << settingName << std::endl;
     return false;
 }
 
@@ -473,7 +552,9 @@ bool ProxqpSolver::setIntegerParameter(const std::string& settingName, int64_t v
         return true;
     }
 
-    QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::setRealNumberParameter: unknown setting name: " << settingName << std::endl;
+    QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::setRealNumberParameter: "
+                                     "unknown setting name: "
+                                  << settingName << std::endl;
     return false;
 }
 
@@ -509,6 +590,10 @@ bool ProxqpSolver::setRealNumberParameter(const std::string& settingName, double
     } else if (settingName == "mu_min_in")
     {
         proxqpSettings.mu_min_in = value;
+        settingFound = true;
+    } else if (settingName == "mu_min_eq")
+    {
+        proxqpSettings.mu_min_eq = value;
         settingFound = true;
     } else if (settingName == "mu_max_eq_inv")
     {
@@ -578,7 +663,9 @@ bool ProxqpSolver::setRealNumberParameter(const std::string& settingName, double
         return true;
     }
 
-    QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::setRealNumberParameter: unknown setting name: " << settingName << std::endl;
+    QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::setRealNumberParameter: "
+                                     "unknown setting name: "
+                                  << settingName << std::endl;
     return false;
 }
 
@@ -596,11 +683,13 @@ bool ProxqpSolver::setStringParameter(const std::string& parameterName, const st
             valueFound = true;
         } else if (value == "EQUALITY_CONSTRAINED_INITIAL_GUESS")
         {
-            proxqpSettings.initial_guess = proxsuite::proxqp::InitialGuessStatus::EQUALITY_CONSTRAINED_INITIAL_GUESS;
+            proxqpSettings.initial_guess
+                = proxsuite::proxqp::InitialGuessStatus::EQUALITY_CONSTRAINED_INITIAL_GUESS;
             valueFound = true;
         } else if (value == "WARM_START_WITH_PREVIOUS_RESULT")
         {
-            proxqpSettings.initial_guess = proxsuite::proxqp::InitialGuessStatus::WARM_START_WITH_PREVIOUS_RESULT;
+            proxqpSettings.initial_guess
+                = proxsuite::proxqp::InitialGuessStatus::WARM_START_WITH_PREVIOUS_RESULT;
             valueFound = true;
         } else if (value == "WARM_START")
         {
@@ -608,11 +697,11 @@ bool ProxqpSolver::setStringParameter(const std::string& parameterName, const st
             valueFound = true;
         } else if (value == "COLD_START_WITH_PREVIOUS_RESULT")
         {
-            proxqpSettings.initial_guess = proxsuite::proxqp::InitialGuessStatus::COLD_START_WITH_PREVIOUS_RESULT;
+            proxqpSettings.initial_guess
+                = proxsuite::proxqp::InitialGuessStatus::COLD_START_WITH_PREVIOUS_RESULT;
             valueFound = true;
         }
     }
-
 
     if (settingFound && valueFound)
     {
@@ -622,10 +711,14 @@ bool ProxqpSolver::setStringParameter(const std::string& parameterName, const st
 
     if (!settingFound)
     {
-        QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::setStringParameter: unknown setting name: " << parameterName << std::endl;
+        QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::setStringParameter: "
+                                         "unknown setting name: "
+                                      << parameterName << std::endl;
     } else if (!valueFound)
     {
-        QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::setStringParameter: unknown value << " << value << " for parameter with name: " << parameterName << std::endl;
+        QpSolversEigen::debugStream()
+            << "QpSolversEigen::ProxqpSolver::setStringParameter: unknown value << " << value
+            << " for parameter with name: " << parameterName << std::endl;
     }
     return false;
 }
@@ -695,4 +788,4 @@ SolverInterface* ProxqpSolver::allocateInstance() const
     return new ProxqpSolver();
 }
 
-}
+} // namespace QpSolversEigen
