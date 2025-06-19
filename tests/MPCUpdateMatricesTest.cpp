@@ -192,7 +192,7 @@ bool updateLinearConstraintsMatrix(QpSolversEigen::Solver& solver, int mpcWindow
     Eigen::SparseMatrix<double> constraintMatrix;
     castMPCToQPConstraintMatrix(mpcWindow, k, constraintMatrix);
 
-    if (!solver.updateLinearConstraintsMatrix(constraintMatrix))
+    if (!solver.updateInequalityConstraintsMatrix(constraintMatrix))
         return false;
 
     return true;
@@ -273,10 +273,10 @@ TEST_CASE("MPCTest Update matrices")
 
     // set the initial data of the QP solver
     solver.data()->setNumberOfVariables(2 * (mpcWindow + 1) + 1 * mpcWindow);
-    solver.data()->setNumberOfConstraints(2 * (mpcWindow + 1));
+    solver.data()->setNumberOfInequalityConstraints(2 * (mpcWindow + 1));
     REQUIRE(solver.data()->setHessianMatrix(hessian));
     REQUIRE(solver.data()->setGradient(gradient));
-    REQUIRE(solver.data()->setLinearConstraintsMatrix(linearMatrix));
+    REQUIRE(solver.data()->setInequalityConstraintsMatrix(linearMatrix));
     REQUIRE(solver.data()->setLowerBound(lowerBound));
     REQUIRE(solver.data()->setUpperBound(upperBound));
 

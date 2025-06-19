@@ -59,7 +59,7 @@ bool NullSolver::updateHessianMatrix(const Eigen::SparseMatrix<double> &hessianM
     return false;
 }
 
-bool NullSolver::updateLinearConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix)
+bool NullSolver::updateInequalityConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix)
 {
     return false;
 }
@@ -85,6 +85,16 @@ bool NullSolver::updateBounds(const Eigen::Ref<const Eigen::Matrix<double, Eigen
     return false;
 }
 
+bool NullSolver::updateEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix)
+{
+    return false;
+}
+
+bool NullSolver::updateEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector)
+{
+    return false;
+}
+
 void NullSolver::clearHessianMatrix()
 {
     return;
@@ -100,7 +110,12 @@ void NullSolver::setNumberOfVariables(int n)
     return;
 }
 
-void NullSolver::setNumberOfConstraints(int m)
+void NullSolver::setNumberOfInequalityConstraints(int m)
+{
+    return;
+}
+
+void NullSolver::setNumberOfEqualityConstraints(int m)
 {
     return;
 }
@@ -121,7 +136,7 @@ Eigen::Matrix<double, Eigen::Dynamic, 1> NullSolver::getGradient()
 }
 
 bool
-NullSolver::setLinearConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix)
+NullSolver::setInequalityConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix)
 {
     return false;
 }
@@ -138,6 +153,16 @@ bool NullSolver::setUpperBound(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 
 
 bool NullSolver::setBounds(Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> lowerBound,
                Eigen::Ref<Eigen::Matrix<double, Eigen::Dynamic, 1>> upperBound)
+{
+    return false;
+}
+
+bool NullSolver::setEqualityConstraintsMatrix(const Eigen::SparseMatrix<double>& equalityConstraintsMatrix)
+{
+    return false;
+}
+
+bool NullSolver::setEqualityConstraintsVector(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& equalityConstraintsVector)
 {
     return false;
 }
