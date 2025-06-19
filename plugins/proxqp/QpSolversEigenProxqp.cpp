@@ -7,6 +7,7 @@
 
 // proxsuite
 #include <proxsuite/proxqp/sparse/sparse.hpp>
+#include <proxsuite/proxqp/dense/dense.hpp>
 
 #include <memory>
 
@@ -18,8 +19,18 @@ class ProxqpSolver final: public SolverInterface
 private:
     // proxqp settings
     proxsuite::proxqp::Settings<double> proxqpSettings;
+
+    // backend used by the solver (sparse or dense)
+    enum class Backend
+    {
+        Sparse,
+        Dense
+    } backend{Backend::Dense};
+
     // proxqp sparse solver
     std::unique_ptr<proxsuite::proxqp::sparse::QP<double, long long>> proxqpSparseSolver;
+    // proxqp dense solver
+    std::unique_ptr<proxsuite::proxqp::dense::QP<double>> proxqpDenseSolver;
 
     struct InitialSparseSolverData {
         int numberOfVariables = 0;
@@ -28,6 +39,7 @@ private:
         // Hessian
         bool isHessianSet = false;
         Eigen::SparseMatrix<double> H;
+        Eigen::MatrixXd Hdense;
 
         // Gradient
         bool isGradientSet = false;
@@ -35,11 +47,13 @@ private:
 
         // Equality constraints data (unused)
         Eigen::SparseMatrix<double> A;
+        Eigen::MatrixXd Adense;
         Eigen::VectorXd b;
 
         // Inequality constraints data
         bool isLinearConstraintsSet = false;
         Eigen::SparseMatrix<double> C;
+        Eigen::MatrixXd Cdense;
         bool isLowerBoundSet = false;
         Eigen::VectorXd l;
         bool isUpperBoundSet = false;
@@ -143,6 +157,11 @@ void ProxqpSolver::syncSettings()
     {
         proxqpSparseSolver->settings = proxqpSettings;
     }
+
+    if (proxqpDenseSolver)
+    {
+        proxqpDenseSolver->settings = proxqpSettings;
+    }
 }
 
 std::string ProxqpSolver::getSolverName() const
@@ -170,23 +189,42 @@ bool ProxqpSolver::initSolver()
 
     // See https://github.com/ami-iit/qpsolvers-eigen/issues/4
     int numberOfEqualityConstraints = 0;
-    proxqpSparseSolver = std::make_unique<proxsuite::proxqp::sparse::QP<double, long long>>(initialSparseSolverData.numberOfVariables, numberOfEqualityConstraints, initialSparseSolverData.numberOfConstraints);
-    syncSettings();
-    proxqpSparseSolver->init(initialSparseSolverData.H, initialSparseSolverData.g,
-                             initialSparseSolverData.A, initialSparseSolverData.b,
-                             initialSparseSolverData.C, initialSparseSolverData.l, initialSparseSolverData.u);
+
+    if (backend == Backend::Sparse)
+    {
+        proxqpSparseSolver = std::make_unique<proxsuite::proxqp::sparse::QP<double, long long>>(initialSparseSolverData.numberOfVariables, numberOfEqualityConstraints, initialSparseSolverData.numberOfConstraints);
+        syncSettings();
+        proxqpSparseSolver->init(initialSparseSolverData.H, initialSparseSolverData.g,
+                                 initialSparseSolverData.A, initialSparseSolverData.b,
+                                 initialSparseSolverData.C, initialSparseSolverData.l, initialSparseSolverData.u);
+    } else if (backend == Backend::Dense)
+    {
+        proxqpDenseSolver = std::make_unique<proxsuite::proxqp::dense::QP<double>>(initialSparseSolverData.numberOfVariables, numberOfEqualityConstraints, initialSparseSolverData.numberOfConstraints);
+        syncSettings();
+        proxqpDenseSolver->init(initialSparseSolverData.Hdense, initialSparseSolverData.g,
+                                initialSparseSolverData.Adense, initialSparseSolverData.b,
+                                initialSparseSolverData.Cdense, initialSparseSolverData.l, initialSparseSolverData.u);
+    }
 
     return isInitialized();
 }
 
 bool ProxqpSolver::isInitialized()
 {
-    return static_cast<bool>(proxqpSparseSolver);
+    if (backend == Backend::Sparse)
+    {
+        return static_cast<bool>(proxqpSparseSolver);
+    } else if (backend == Backend::Dense)
+    {
+        return static_cast<bool>(proxqpDenseSolver);
+    }
+    return false;
 }
 
 void ProxqpSolver::clearSolver()
 {
     proxqpSparseSolver.reset();
+    proxqpDenseSolver.reset();
 }
 
 bool ProxqpSolver::clearSolverVariables()
@@ -197,13 +235,18 @@ bool ProxqpSolver::clearSolverVariables()
 
 QpSolversEigen::ErrorExitFlag ProxqpSolver::solveProblem()
 {
-    if (!proxqpSparseSolver)
+    if (!isInitialized())
     {
         QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::solveProblem: solver not initialized." << std::endl;
         return QpSolversEigen::ErrorExitFlag::WorkspaceNotInitError;
     }
 
-    proxqpSparseSolver->solve();
+    if (backend == Backend::Sparse)
+    {
+        proxqpSparseSolver->solve();
+    } else {
+        proxqpDenseSolver->solve();
+    }
 
 
     return QpSolversEigen::ErrorExitFlag::NoError;
@@ -211,28 +254,49 @@ QpSolversEigen::ErrorExitFlag ProxqpSolver::solveProblem()
 
 QpSolversEigen::Status ProxqpSolver::getStatus() const
 {
-    if (!proxqpSparseSolver)
+    if (! (static_cast<bool>(proxqpSparseSolver) || static_cast<bool>(proxqpDenseSolver)))
     {
         QpSolversEigen::debugStream() << "QpSolversEigen::ProxqpSolver::solveProblem: solver not initialized." << std::endl;
         return QpSolversEigen::Status::SolverNotInitialized;
     }
 
-    return this->convertStatus(proxqpSparseSolver->results.info.status);
+
+    if (backend == Backend::Sparse)
+    {
+        return this->convertStatus(proxqpSparseSolver->results.info.status);
+    } else {
+        return this->convertStatus(proxqpDenseSolver->results.info.status);
+    }
 }
 
 const double ProxqpSolver::getObjValue() const
 {
-    return proxqpSparseSolver->results.info.objValue;
+    if (backend == Backend::Sparse)
+    {
+        return proxqpSparseSolver->results.info.objValue;
+    } else {
+        return proxqpDenseSolver->results.info.objValue;
+    }
 }
 
 const Eigen::Matrix<double, Eigen::Dynamic, 1>& ProxqpSolver::getSolution()
 {
-    return proxqpSparseSolver->results.x;
+    if (backend == Backend::Sparse)
+    {
+        return proxqpSparseSolver->results.x;
+    } else {
+        return proxqpDenseSolver->results.x;
+    }
 }
 
 const Eigen::Matrix<double, Eigen::Dynamic, 1>& ProxqpSolver::getDualSolution()
 {
-    return proxqpSparseSolver->results.z;
+    if (backend == Backend::Sparse)
+    {
+        return proxqpSparseSolver->results.z;
+    } else {
+        return proxqpDenseSolver->results.z;
+    }
 }
 
 bool ProxqpSolver::updateHessianMatrix(const Eigen::SparseMatrix<double> &hessianMatrix)
@@ -243,51 +307,103 @@ bool ProxqpSolver::updateHessianMatrix(const Eigen::SparseMatrix<double> &hessia
         return false;
     }
 
-    proxqpSparseSolver->update(initialSparseSolverData.H, proxsuite::nullopt,
+
+    if (backend == Backend::Sparse)
+    {
+        proxqpSparseSolver->update(hessianMatrix, proxsuite::nullopt,
                                proxsuite::nullopt, proxsuite::nullopt,
                                proxsuite::nullopt, proxsuite::nullopt, proxsuite::nullopt);
+    } else {
+        initialSparseSolverData.Hdense = hessianMatrix;
+        proxqpDenseSolver->update(initialSparseSolverData.Hdense, proxsuite::nullopt,
+                               proxsuite::nullopt, proxsuite::nullopt,
+                               proxsuite::nullopt, proxsuite::nullopt, proxsuite::nullopt);
+    }
+
 
     return true;
 }
 
 bool ProxqpSolver::updateLinearConstraintsMatrix(const Eigen::SparseMatrix<double> &linearConstraintsMatrix)
 {
-    proxqpSparseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
+    if (!isInitialized())
+    {
+        debugStream() << "QpSolversEigen::ProxqpSolver::updateLinearConstraintsMatrix: solver was not initialized." << std::endl;
+        return false;
+    }
+
+    if (backend == Backend::Sparse)
+    {
+        proxqpSparseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
+                                   proxsuite::nullopt, proxsuite::nullopt,
+                                   linearConstraintsMatrix, proxsuite::nullopt, proxsuite::nullopt);
+    } else {
+        initialSparseSolverData.Cdense = linearConstraintsMatrix;
+        proxqpDenseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
                                proxsuite::nullopt, proxsuite::nullopt,
-                               linearConstraintsMatrix, proxsuite::nullopt, proxsuite::nullopt);
+                               initialSparseSolverData.Cdense, proxsuite::nullopt, proxsuite::nullopt);
+    }
     return true;
 }
 
 bool ProxqpSolver::updateGradient(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& gradient)
 {
-    proxqpSparseSolver->update(proxsuite::nullopt, gradient,
+    if (backend == Backend::Sparse)
+    {
+        proxqpSparseSolver->update(proxsuite::nullopt, gradient,
                                proxsuite::nullopt, proxsuite::nullopt,
                                proxsuite::nullopt, proxsuite::nullopt, proxsuite::nullopt);
+    } else {
+        proxqpDenseSolver->update(proxsuite::nullopt, gradient,
+                               proxsuite::nullopt, proxsuite::nullopt,
+                               proxsuite::nullopt, proxsuite::nullopt, proxsuite::nullopt);
+    }
     return true;
 }
 
 bool ProxqpSolver::updateLowerBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound)
 {
-    proxqpSparseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
-                               proxsuite::nullopt, proxsuite::nullopt,
-                               proxsuite::nullopt, lowerBound, proxsuite::nullopt);
+    if (backend == Backend::Sparse)
+    {
+        proxqpSparseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
+                                   proxsuite::nullopt, proxsuite::nullopt,
+                                   proxsuite::nullopt, lowerBound, proxsuite::nullopt);
+    } else {
+        proxqpDenseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
+                                   proxsuite::nullopt, proxsuite::nullopt,
+                                   proxsuite::nullopt, lowerBound, proxsuite::nullopt);
+    }
     return true;
 }
 
 bool ProxqpSolver::updateUpperBound(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound)
 {
-    proxqpSparseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
+    if (backend == Backend::Sparse)
+    {
+        proxqpSparseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
                                proxsuite::nullopt, proxsuite::nullopt,
                                proxsuite::nullopt, proxsuite::nullopt, upperBound);
+    } else {
+        proxqpDenseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
+                               proxsuite::nullopt, proxsuite::nullopt,
+                               proxsuite::nullopt, proxsuite::nullopt, upperBound);
+    }
     return true;
 }
 
 bool ProxqpSolver::updateBounds(const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& lowerBound,
              const Eigen::Ref<const Eigen::Matrix<double, Eigen::Dynamic, 1>>& upperBound)
 {
-    proxqpSparseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
-                               proxsuite::nullopt, proxsuite::nullopt,
-                               proxsuite::nullopt, lowerBound, upperBound);
+    if (backend == Backend::Sparse)
+    {
+        proxqpSparseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
+                                 proxsuite::nullopt, proxsuite::nullopt,
+                                   proxsuite::nullopt, lowerBound, upperBound);
+    } else {
+        proxqpDenseSolver->update(proxsuite::nullopt, proxsuite::nullopt,
+                                 proxsuite::nullopt, proxsuite::nullopt,
+                                   proxsuite::nullopt, lowerBound, upperBound);
+    }
     return true;
 }
 
@@ -305,7 +421,12 @@ void ProxqpSolver::clearLinearConstraintsMatrix()
 
 bool ProxqpSolver::setHessianMatrix(const Eigen::SparseMatrix<double>& hessianMatrix)
 {
-    initialSparseSolverData.H = hessianMatrix;
+    if (backend == Backend::Sparse)
+    {
+        initialSparseSolverData.H = hessianMatrix;
+    } else {
+        initialSparseSolverData.Hdense = hessianMatrix;
+    }
     initialSparseSolverData.isHessianSet = true;
     return true;
 }
@@ -325,7 +446,13 @@ Eigen::Matrix<double, Eigen::Dynamic, 1> ProxqpSolver::getGradient()
 bool
 ProxqpSolver::setLinearConstraintsMatrix(const Eigen::SparseMatrix<double>& linearConstraintsMatrix)
 {
-    initialSparseSolverData.C = linearConstraintsMatrix;
+    if (backend == Backend::Sparse)
+    {
+        initialSparseSolverData.C = linearConstraintsMatrix;
+    } else {
+        initialSparseSolverData.Cdense = linearConstraintsMatrix;
+    }
+
     initialSparseSolverData.isLinearConstraintsSet = true;
     return true;
 }
