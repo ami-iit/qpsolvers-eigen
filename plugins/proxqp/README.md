@@ -43,6 +43,7 @@ If you need support for more parameters, please open an issue.
 | `beta_bcl`        | |
 | `refactor_dual_feasibility_threshold` | |
 | `refactor_rho_threshold` | |
+| `mu_min_eq` | |
 | `mu_min_in` | |
 | `mu_max_eq_inv` | |
 | `mu_max_in_inv` | |

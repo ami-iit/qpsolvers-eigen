@@ -121,12 +121,12 @@ void castMPCToQPGradient(const Eigen::DiagonalMatrix<double, 12>& Q,
     }
 }
 
-void castMPCToQPConstraintMatrix(const Eigen::Matrix<double, 12, 12>& dynamicMatrix,
+void castMPCToQPLinearConstraintMatrix(const Eigen::Matrix<double, 12, 12>& dynamicMatrix,
                                  const Eigen::Matrix<double, 12, 4>& controlMatrix,
                                  int mpcWindow,
                                  Eigen::SparseMatrix<double>& constraintMatrix)
 {
-    constraintMatrix.resize(12 * (mpcWindow + 1) + 12 * (mpcWindow + 1) + 4 * mpcWindow,
+    constraintMatrix.resize( 12 * (mpcWindow + 1),
                             12 * (mpcWindow + 1) + 4 * mpcWindow);
 
     // populate linear constraint matrix
@@ -157,10 +157,18 @@ void castMPCToQPConstraintMatrix(const Eigen::Matrix<double, 12, 12>& dynamicMat
                         = value;
                 }
             }
+}
 
+
+void castMPCToQPInequalityConstraintMatrix(int mpcWindow, Eigen::SparseMatrix<double>& constraintMatrix)
+{
+    constraintMatrix.resize(12 * (mpcWindow + 1) + 4 * mpcWindow,
+                            12 * (mpcWindow + 1) + 4 * mpcWindow);
+
+    // populate linear constraint matrix
     for (int i = 0; i < 12 * (mpcWindow + 1) + 4 * mpcWindow; i++)
     {
-        constraintMatrix.insert(i + (mpcWindow + 1) * 12, i) = 1;
+        constraintMatrix.insert(i, i) = 1;
     }
 }
 
@@ -170,14 +178,15 @@ void castMPCToQPConstraintVectors(const Eigen::Matrix<double, 12, 1>& xMax,
                                   const Eigen::Matrix<double, 4, 1>& uMin,
                                   const Eigen::Matrix<double, 12, 1>& x0,
                                   int mpcWindow,
-                                  Eigen::Matrix<double, -1, 1>& lowerBound,
-                                  Eigen::Matrix<double, -1, 1>& upperBound)
+                                  Eigen::VectorXd& equalityVectorConstraints,
+                                  Eigen::VectorXd& lowerInequality,
+                                  Eigen::VectorXd& upperInequality)
 {
     // evaluate the lower and the upper inequality vectors
-    Eigen::Matrix<double, -1, 1> lowerInequality
-        = Eigen::Matrix<double, -1, -1>::Zero(12 * (mpcWindow + 1) + 4 * mpcWindow, 1);
-    Eigen::Matrix<double, -1, 1> upperInequality
-        = Eigen::Matrix<double, -1, -1>::Zero(12 * (mpcWindow + 1) + 4 * mpcWindow, 1);
+    lowerInequality
+        = Eigen::MatrixXd::Zero(12 * (mpcWindow + 1) + 4 * mpcWindow, 1);
+    upperInequality
+        = Eigen::MatrixXd::Zero(12 * (mpcWindow + 1) + 4 * mpcWindow, 1);
     for (int i = 0; i < mpcWindow + 1; i++)
     {
         lowerInequality.block(12 * i, 0, 12, 1) = xMin;
@@ -190,27 +199,14 @@ void castMPCToQPConstraintVectors(const Eigen::Matrix<double, 12, 1>& xMax,
     }
 
     // evaluate the lower and the upper equality vectors
-    Eigen::Matrix<double, -1, 1> lowerEquality
-        = Eigen::Matrix<double, -1, -1>::Zero(12 * (mpcWindow + 1), 1);
-    Eigen::Matrix<double, -1, 1> upperEquality;
-    lowerEquality.block(0, 0, 12, 1) = -x0;
-    upperEquality = lowerEquality;
-    lowerEquality = lowerEquality;
-
-    // merge inequality and equality vectors
-    lowerBound = Eigen::Matrix<double, -1, -1>::Zero(2 * 12 * (mpcWindow + 1) + 4 * mpcWindow, 1);
-    lowerBound << lowerEquality, lowerInequality;
-
-    upperBound = Eigen::Matrix<double, -1, -1>::Zero(2 * 12 * (mpcWindow + 1) + 4 * mpcWindow, 1);
-    upperBound << upperEquality, upperInequality;
+    equalityVectorConstraints = Eigen::MatrixXd::Zero(12 * (mpcWindow + 1), 1);
+    equalityVectorConstraints.block(0, 0, 12, 1) = -x0;
 }
 
-void updateConstraintVectors(const Eigen::Matrix<double, 12, 1>& x0,
-                             Eigen::Matrix<double, -1, 1>& lowerBound,
-                             Eigen::Matrix<double, -1, 1>& upperBound)
+void updateLinearConstraintVectors(const Eigen::Matrix<double, 12, 1>& x0,
+                             Eigen::VectorXd& equalityVectorConstraints)
 {
-    lowerBound.block(0, 0, 12, 1) = -x0;
-    upperBound.block(0, 0, 12, 1) = -x0;
+    equalityVectorConstraints.block(0, 0, 12, 1) = -x0;
 }
 
 double
@@ -253,7 +249,9 @@ TEST_CASE("MPCTest")
     // allocate QP problem matrices and vectors
     Eigen::SparseMatrix<double> hessian;
     Eigen::Matrix<double, -1, 1> gradient;
-    Eigen::SparseMatrix<double> linearMatrix;
+    Eigen::SparseMatrix<double> linearEqMatrix;
+    Eigen::SparseMatrix<double> linearInqeMatrix;
+    Eigen::VectorXd equalityVectorConstraints;
     Eigen::Matrix<double, -1, 1> lowerBound;
     Eigen::Matrix<double, -1, 1> upperBound;
 
@@ -270,8 +268,9 @@ TEST_CASE("MPCTest")
     // cast the MPC problem as QP problem
     castMPCToQPHessian(Q, R, mpcWindow, hessian);
     castMPCToQPGradient(Q, xRef, mpcWindow, gradient);
-    castMPCToQPConstraintMatrix(a, b, mpcWindow, linearMatrix);
-    castMPCToQPConstraintVectors(xMax, xMin, uMax, uMin, x0, mpcWindow, lowerBound, upperBound);
+    castMPCToQPLinearConstraintMatrix(a, b, mpcWindow, linearEqMatrix);
+    castMPCToQPInequalityConstraintMatrix(mpcWindow, linearInqeMatrix);
+    castMPCToQPConstraintVectors(xMax, xMin, uMax, uMin, x0, mpcWindow, equalityVectorConstraints, lowerBound, upperBound);
 
 
     // instantiate the solver
@@ -297,10 +296,13 @@ TEST_CASE("MPCTest")
 
     // set the initial data of the QP solver
     solver.data()->setNumberOfVariables(12 * (mpcWindow + 1) + 4 * mpcWindow);
-    solver.data()->setNumberOfInequalityConstraints(2 * 12 * (mpcWindow + 1) + 4 * mpcWindow);
+    solver.data()->setNumberOfInequalityConstraints(12 * (mpcWindow + 1) + 4 * mpcWindow);
+    solver.data()->setNumberOfEqualityConstraints(12 * (mpcWindow + 1));
     REQUIRE(solver.data()->setHessianMatrix(hessian));
     REQUIRE(solver.data()->setGradient(gradient));
-    REQUIRE(solver.data()->setInequalityConstraintsMatrix(linearMatrix));
+    REQUIRE(solver.data()->setInequalityConstraintsMatrix(linearInqeMatrix));
+    REQUIRE(solver.data()->setEqualityConstraintsMatrix(linearEqMatrix));
+    REQUIRE(solver.data()->setEqualityConstraintsVector(equalityVectorConstraints));
     REQUIRE(solver.data()->setLowerBound(lowerBound));
     REQUIRE(solver.data()->setUpperBound(upperBound));
 
@@ -339,8 +341,8 @@ TEST_CASE("MPCTest")
         x0 = a * x0 + b * ctr;
 
         // update the constraint bound
-        updateConstraintVectors(x0, lowerBound, upperBound);
-        REQUIRE(solver.updateBounds(lowerBound, upperBound));
+        updateLinearConstraintVectors(x0, equalityVectorConstraints);
+        REQUIRE(solver.updateEqualityConstraintsVector(equalityVectorConstraints));
 
         endTime = clock();
 

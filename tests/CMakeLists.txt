@@ -21,4 +21,9 @@ add_qpsolverseigen_test(
   LINKS QpSolversEigen::QpSolversEigen
   COMPILE_DEFINITIONS _USE_MATH_DEFINES)
 
+  add_qpsolverseigen_test(
+    NAME MPCEqualityConstraints
+    SOURCES MPCEqualityConstraintsTest.cpp
+    LINKS QpSolversEigen::QpSolversEigen
+    COMPILE_DEFINITIONS _USE_MATH_DEFINES)
 
