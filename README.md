@@ -141,10 +141,10 @@ int main()
     }
 
     solver.data()->setNumberOfVariables(2);
-    solver.data()->setNumberOfConstraints(3);
+    solver.data()->setNumberOfInequalityConstraints(3);
     ok = ok && solver.data()->setHessianMatrix(H_s);
     ok = ok && solver.data()->setGradient(gradient);
-    ok = ok && solver.data()->setLinearConstraintsMatrix(A_s);
+    ok = ok && solver.data()->setInequalityConstraintsMatrix(A_s);
     ok = ok && solver.data()->setLowerBound(lowerBound);
     ok = ok && solver.data()->setUpperBound(upperBound);
     ok = ok && solver.initSolver();

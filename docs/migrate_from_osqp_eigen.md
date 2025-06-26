@@ -52,6 +52,16 @@ solver.setHessianMatrix(hessian)
 solver.setGradient(gradient)
 ~~~
 
+One difference between osqp-eigen and qpsolvers-eigen is that qpsolvers-eigen support explicit equality constraints, so the method related to set inequality constraints have new names:
+
+| `OsqpEigen` name | `QpSolversEigen` name |
+|:----------------:|:----------------------:|
+| `updateLinearConstraintsMatrix()` | `updateInequalityConstraintsMatrix()`  |
+| `setLinearConstraintsMatrix()`    | `setInequalityConstraintsMatrix()`     |
+| `setNumberOfConstraints()`        | `setNumberOfInequalityConstraints()`   |
+
+If in your osqp-eigen code you were converting equality constraints to inequality constraints, you can now directly set your equality constraints.
+
 ## solver.settings() methods
 
 As `QpSolversEigen` has a generic solver-agnostic interface, to set parameters you need to specify the parameter to set by name, so you need to port code such as:
