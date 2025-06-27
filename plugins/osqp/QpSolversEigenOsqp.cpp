@@ -356,7 +356,7 @@ void OsqpSolver::setNumberOfInequalityConstraints(int m)
 {
     if (numberOfVariables == 0)
     {
-        QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::setNumberOfConstraints: number of variables is not set, cannot set number of constraints." << std::endl;
+        QpSolversEigen::debugStream() << "QpSolversEigen::OsqpSolver::setNumberOfInequalityConstraints: number of variables is not set, cannot set number of constraints." << std::endl;
         return;
     }
     numberOfInequalityConstraints = m;
